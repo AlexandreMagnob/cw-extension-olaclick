@@ -56,37 +56,40 @@ class Scrapy {
           let complementExpandables = document.querySelectorAll('div.expandable');
           complementExpandables.forEach((complementExpandable) => {
             let complementElements = complementExpandable.querySelectorAll('div.expandable__fixed.py-2.px-4.pointer.bg-grey-12');
-            let optionsComplement = []; 
+            let optionsComplement = [];
 
             //Pegar o nome de cada complemento
             complementElements.forEach((complementElement) => {
-              let complementTitleElement = complementElement.querySelector('.expandable__fixed__header__text__title.font-2.text-black');
               let typeComplementElement = complementElement.querySelector('span.expandable__fixed__header__text__subtitle.font-1.text-grey');
               let requiredElement = complementElement.querySelector('span.expandable__fixed__header__text__required.font-0.ml-2.text-primary');
               let complementNameElement = complementElement.querySelector('div.expandable:nth-of-type(1) span.expandable__fixed__header__text__title');
-              
-              let titleComplement = complementTitleElement ? complementTitleElement.textContent : "";
+
               let typeComplement = typeComplementElement ? typeComplementElement.textContent : "";
               let required = requiredElement ? requiredElement.textContent : "";
-              let complementName = complementNameElement ? complementNameElement : "";
+              let complementName = complementNameElement ? complementNameElement.textContent : "";
 
               //Pegar nome de cada opção do complemento da iteracao
               let optionsElement = complementExpandable.querySelectorAll('.chooser');
               optionsElement.forEach((optionElement) => {
                 let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
                 let optionPriceElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.price__now');
-                let optionQtdElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.mt-1');
+                let optionQtdElement = optionElement.querySelector('span.text-grey-3');
+                let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
 
                 let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
                 let optionPrice = optionPriceElement ? optionPriceElement.textContent : "0";
                 let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
+                let optionDescription = optionDescriptionElement ? optionDescriptionElement.textContent : "";
 
-                optionsComplement.push({optionTitle, optionPrice, optionQtd });
+                optionsComplement.push({ 
+                  optionTitle: optionTitle, 
+                  optionPrice: optionPrice, 
+                  optionQtd: optionQtd, 
+                  optionDescription: optionDescription});
               });
 
               complementsDict.push({
                 nameComplement: complementName,
-                titleComplement: titleComplement,
                 typeComplement: typeComplement,
                 required: required,
                 options: optionsComplement,
@@ -95,7 +98,7 @@ class Scrapy {
           });
 
           productData.push({
-            title : title,
+            title: title,
             priceNow: priceNow,
             imgSrc: imgSrc,
             descricao: descricao,
