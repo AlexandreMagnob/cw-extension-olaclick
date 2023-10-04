@@ -1,7 +1,6 @@
 class Scrapy {
   constructor() {
-    this.scrapedData = {};
-    this.complementsDict = {};
+    this.scrapedData = [];
   }
 
   checkAndScrape() {
@@ -15,55 +14,54 @@ class Scrapy {
 
   clickCategoryCards() {
     let categoryCards = document.querySelectorAll('div.category-card');
-    console.log("Tamanho das categorias" + categoryCards.length);
 
     categoryCards.forEach((categoryCard) => {
+      setTimeout(() => {
       categoryCard.click();
       this.clickProductCards();
-      //window.history.back();
+      window.history.go(-1)}, 300);
     });
   }
-
+  
   clickProductCards() {
     let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
-
+    
     categoryDivs.forEach((categoryDiv) => {
       let categoryNameElement = categoryDiv.querySelector('span[data-v-c24acdb4]');
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-      let productData = {}
-
+      
       setTimeout(() => {
         let productCards = document.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small[data-v-58044642]');
-        console.log("Tamanho dos produtos" + productCards.length);
-
+        
+        let productData = [];
         productCards.forEach((productCard) => {
           let innerDiv = productCard.querySelector('div.item-card-container.row.justify-between');
           if (innerDiv) {
             innerDiv.click();
           }
-
+          
           let titleElement = document.querySelector('span.font-5');
           let priceNowElement = document.querySelector('span.price__now.font-3');
           let imgElement = document.querySelector('img');
           let descricaoElement = document.querySelector('span.weight-400');
-
+          
           let title = titleElement ? titleElement.textContent : "";
           let priceNow = priceNowElement ? priceNowElement.textContent : "";
           let imgSrc = imgElement ? imgElement.src : "";
           let descricao = descricaoElement ? descricaoElement.textContent : "";
-
+          
           let complementsDict = []
           let complementExpandables = document.querySelectorAll('div.expandable');
           complementExpandables.forEach((complementExpandable) => {
             let complementElements = complementExpandable.querySelectorAll('div.expandable__fixed.py-2.px-4.pointer.bg-grey-12');
             let optionsComplement = [];
-
+            
             //Pegar o nome de cada complemento
             complementElements.forEach((complementElement) => {
               let typeComplementElement = complementElement.querySelector('span.expandable__fixed__header__text__subtitle.font-1.text-grey');
               let requiredElement = complementElement.querySelector('span.expandable__fixed__header__text__required.font-0.ml-2.text-primary');
               let complementNameElement = complementElement.querySelector('div.expandable:nth-of-type(1) span.expandable__fixed__header__text__title');
-
+              
               let typeComplement = typeComplementElement ? typeComplementElement.textContent : "";
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
@@ -75,7 +73,7 @@ class Scrapy {
                 let optionPriceElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.price__now');
                 let optionQtdElement = optionElement.querySelector('span.text-grey-3');
                 let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
-
+                
                 let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
                 let optionPrice = optionPriceElement ? optionPriceElement.textContent : "0";
                 let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
@@ -86,8 +84,8 @@ class Scrapy {
                   optionPrice: optionPrice, 
                   optionQtd: optionQtd, 
                   optionDescription: optionDescription});
-              });
-
+                });
+                
               complementsDict.push({
                 nameComplement: complementName,
                 typeComplement: typeComplement,
@@ -109,13 +107,26 @@ class Scrapy {
             categoryName: categoryName,
             productsCategory: productData
           });
-
+          window.history.go(-1)
         });
       }, 3000);
     });
-    //window.history.back();
   }
 }
+
+function backPage(){
+  let back = document.querySelector('#app > div.main-container.w-100.not-small.has-search-bar > div > div.w-100.item-header-container > div.navigation-header.flex.items-center.justify-between.navigation-header--small.bg-white > div:nth-child(1) > div > div');
+  back.click()
+}
+
+function desativarAlerta() {
+  const alertContainer = document.querySelector('[data-testid="alert-container"]');
+  if (alertContainer) {
+    alertContainer.remove();
+  }
+}
+// Chame a função desativarAlerta antes de executar outras ações
+desativarAlerta();
 
 // Execute a função quando a página estiver totalmente carregada
 window.addEventListener('load', () => {
