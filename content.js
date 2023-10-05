@@ -31,7 +31,7 @@ class Scrapy {
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
       
       setTimeout(() => {
-        let productCards = document.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small[data-v-58044642]');
+        let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small[data-v-58044642]');
         
         let productData = [];
         productCards.forEach((productCard) => {
