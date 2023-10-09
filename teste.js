@@ -1,47 +1,23 @@
-class Scrapy {
-  constructor() {
-    this.scrapedData = [];
-  }
-  sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
-
-  checkAndScrape() {
-    const categoryCards = document.querySelectorAll('div.category-card');
-    if (categoryCards.length > 0) {
-      this.clickCategoryCards();
-    } else {
-      this.clickProductCards();
-    }
-  }
-
-  async clickCategoryCards() {
-    let categoryCards = document.querySelectorAll('div.category-card');
-    for await (const categoryCard of categoryCards){
-        categoryCard.click();
-        await this.sleep(2)
-        await this.clickProductCards();
-        await backPage()
-      }
-    }
-  
-
-  async clickProductCards() {
+let scrapedData = [];
+function sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
+async function clickProductCards() {
     let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
-
+        console.log(categoryDivs.length)
     for await (const categoryDiv of categoryDivs) {
       let categoryNameElement = categoryDiv.querySelector('span[data-v-c24acdb4]');
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-
-        let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small[data-v-58044642]');
-
+      console.log(categoryName)
+        await sleep(400)
+        let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small .item-card-container.row.justify-between');            console.log(productCards.length)
         let productData = [];
         for await (const productCard of productCards){
-          let innerDiv = productCard.querySelector('div.item-card-container.row.justify-between');
-          if (innerDiv) {
-            innerDiv.click();
-
+           await sleep(400)
+          if (productCard) {
+            await sleep(500)
+            productCard.click();
 
             // Agora, vamos adicionar um atraso antes de coletar os dados.
-              await this.sleep(1500)
+              await sleep(1500)
               let titleElement = document.querySelector('span.font-5');
               let priceNowElement = document.querySelector('span.price__now.font-3');
               let imgElement = document.querySelector('img');
@@ -51,15 +27,17 @@ class Scrapy {
               let priceNow = priceNowElement ? priceNowElement.textContent : "";
               let imgSrc = imgElement ? imgElement.src : "";
               let descricao = descricaoElement ? descricaoElement.textContent : "";
-
+              console.log(title)
               let complementsDict = []
               let complementExpandables = document.querySelectorAll('div.expandable');
-              for await (const complementExpandables of complementExpandable) {
+              for await (const complementExpandable of complementExpandables) {
+                await sleep(200)
                 let complementElements = complementExpandable.querySelectorAll('div.expandable__fixed.py-2.px-4.pointer.bg-grey-12');
                 let optionsComplement = [];
 
                 // Pegar o nome de cada complemento
                 for await (const complementElement of complementElements){
+                    await sleep(200)
                   let typeComplementElement = complementElement.querySelector('span.expandable__fixed__header__text__subtitle.font-1.text-grey');
                   let requiredElement = complementElement.querySelector('span.expandable__fixed__header__text__required.font-0.ml-2.text-primary');
                   let complementNameElement = complementElement.querySelector('span.expandable__fixed__header__text__title');
@@ -71,7 +49,7 @@ class Scrapy {
                   // Pegar nome de cada opção do complemento da iteração
                   let optionsElement = complementExpandable.querySelectorAll('.chooser');
                   for await (const optionElement of optionsElement) {
-                    await this.sleep(200)
+                    await sleep(200)
                     let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
                     let optionPriceElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.price__now');
                     let optionQtdElement = optionElement.querySelector('span.text-grey-3');
@@ -107,38 +85,23 @@ class Scrapy {
                 complementsDict: complementsDict
               });
 
-              this.scrapedData.push({
+              scrapedData.push({
                 categoryName: categoryName,
                 productsCategory: productData
               });
               await backPage();
           }
+        else{
+            console.log("Produto não foi clicado" (productCard))
+        }
         }
     }
   }
-}
 
-async function backPage() {
-  await sleep(2000)
-  let back = document.querySelector('#app > div.main-container.w-100.not-small.has-search-bar > div > div.w-100.item-header-container > div.navigation-header.flex.items-center.justify-between.navigation-header--small.bg-white > div:nth-child(1) > div > div');
-  back.click()
-}
-
-function desativarAlerta() {
-  const alertContainer = document.querySelector('[data-testid="alert-container"]');
-  if (alertContainer) {
-    alertContainer.remove();
+  async function backPage() {
+    await sleep(2000)
+    let back = document.querySelector('#app > div.main-container.w-100.not-small.has-search-bar > div > div.w-100.item-header-container > div.navigation-header.flex.items-center.justify-between.navigation-header--small.bg-white > div:nth-child(1) > div > div');
+    if (back){
+        back.click()
+    }
   }
-}
-// Chame a função desativarAlerta antes de executar outras ações
-desativarAlerta();
-
-// Execute a função quando a página estiver totalmente carregada
-window.addEventListener('load', () => {
-  const scraper = new Scrapy();
-  scraper.checkAndScrape();
-
-  // Transforma this.scrapedData em JSON e exibe no console
-  const jsonData = JSON.stringify(scraper.scrapedData);
-  console.log(jsonData);
-});
