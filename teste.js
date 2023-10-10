@@ -6,8 +6,10 @@ async function clickProductCards() {
   await sleep(500)
   let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
 
-  for await (const categoryDiv of categoryDivs) {
+  for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
     await sleep(500)
+    let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
+    let categoryDiv = categoryDivs[categoryIndex];
     let categoryNameElement = categoryDiv.querySelector('span[data-v-c24acdb4]');
     let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
 
@@ -15,17 +17,21 @@ async function clickProductCards() {
 
     let productData = [];
     for await (const productIndex of [...Array(productCards.length).keys()]) {
-      await sleep(1500)
+      await sleep(500)
+      let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
+      let categoryDiv = categoryDivs[categoryIndex];
       let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
       let productCard = productCards[productIndex];
-      console.log(productCard.textContent);
+
+      console.log(productCard.textContent); //debuging..
+
       let innerDiv = productCard.querySelector('.item-card-container.row.justify-between');
       if (innerDiv) {
-        await sleep(1000)
+        await sleep(500)
         innerDiv.click();
         console.log("clicou")
         // Agora, vamos adicionar um atraso antes de coletar os dados.
-        await sleep(1500)
+        await sleep(1000)
 
         let titleElement = document.querySelector('span.font-5');
         let priceNowElement = document.querySelector('span.price__now.font-3');
@@ -56,7 +62,6 @@ async function clickProductCards() {
             // Pegar nome de cada opção do complemento da iteração
             let optionsElement = complementExpandable.querySelectorAll('.chooser');
             for await (const optionElement of optionsElement) {
-              await sleep(200)
               let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
               let optionPriceElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.price__now');
               let optionQtdElement = optionElement.querySelector('span.text-grey-3');
@@ -73,8 +78,8 @@ async function clickProductCards() {
                 optionQtd: optionQtd,
                 optionDescription: optionDescription
               });
-              console.log("options extraida")
             }
+            console.log("options extraida")
 
             complementsDict.push({
               nameComplement: complementName,
@@ -82,8 +87,8 @@ async function clickProductCards() {
               required: required,
               options: optionsComplement,
             })
-            console.log("complements extraida")
           }
+          console.log("complements extraida")
         }
 
         productData.push({
@@ -94,9 +99,7 @@ async function clickProductCards() {
           complementsDict: complementsDict
         });
         console.log("productData extraido")
-      }
-      else {
-        console.log("nao cli")
+        await backPage();
       }
     }
     scrapedData.push({
@@ -109,7 +112,7 @@ async function clickProductCards() {
 }
 
 async function backPage() {
-  await sleep(2000);
+  await sleep(1000);
   let back = document.querySelector('#app > div.main-container.w-100.not-small.has-search-bar > div > div.w-100.item-header-container > div.navigation-header.flex.items-center.justify-between.navigation-header--small.bg-white > div:nth-child(1) > div > div');
   if (back) {
     back.click()
