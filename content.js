@@ -18,19 +18,19 @@ class Scrapy {
     let categoryCards = document.querySelectorAll('div.category-card');
     for await (const categoryCard of categoryCards){
         categoryCard.click();
-        await this.this.sleep(2)
+        await this.sleep(2)
         await this.clickProductCards();
-        await backPage()
+        await this.backPage()
       }
     }
   
 
   async clickProductCards() {
-    await sleep(500)
+    await this.sleep(500)
     let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
   
     for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
-      await sleep(500)
+      await this.sleep(500)
       let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
       let categoryDiv = categoryDivs[categoryIndex];
       let categoryNameElement = categoryDiv.querySelector('span[data-v-c24acdb4]');
@@ -40,7 +40,7 @@ class Scrapy {
   
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
-        await sleep(500)
+        await this.sleep(500)
         let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
         let categoryDiv = categoryDivs[categoryIndex];
         let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
@@ -50,11 +50,11 @@ class Scrapy {
   
         let innerDiv = productCard.querySelector('.item-card-container.row.justify-between');
         if (innerDiv) {
-          await sleep(500)
+          await this.sleep(500)
           innerDiv.click();
           console.log("clicou")
           // Agora, vamos adicionar um atraso antes de coletar os dados.
-          await sleep(1000)
+          await this.sleep(1000)
   
           let titleElement = document.querySelector('span.font-5');
           let priceElement = document.querySelector('span.price__now.font-3');
@@ -124,7 +124,7 @@ class Scrapy {
             complementsDict: complementsDict
           });
           console.log("productData extraido")
-          await backPage();
+          await this.backPage();
         }
       }
       this.scrapedData.push({
@@ -132,15 +132,17 @@ class Scrapy {
         productsCategory: productData
       });
       console.log("scrapedData adicionado")
-      await backPage();
+      await this.backPage();
     }
 }
-}
 
-async function backPage() {
-  await this.sleep(1200)
+
+async backPage() {
+  await this.sleep(1000);
   let back = document.querySelector('#app > div.main-container.w-100.not-small.has-search-bar > div > div.w-100.item-header-container > div.navigation-header.flex.items-center.justify-between.navigation-header--small.bg-white > div:nth-child(1) > div > div');
-  back.click()
+  if (back) {
+    back.click()
+}}
 }
 
 function desativarAlerta() {
@@ -151,6 +153,84 @@ function desativarAlerta() {
 }
 // Chame a função desativarAlerta antes de executar outras ações
 desativarAlerta();
+
+function createCSV(scrapedData) {
+  const csvData = [];
+
+  // Cabeçalho do CSV
+  csvData.push([
+    'TIPO',
+    'NOME',
+    'DESCRIÇÃO',
+    'VALOR',
+    'VALOR DE CUSTO',
+    'VALOR PROMOCIONAL',
+    'IMAGEM',
+    'CODIGO PDV',
+    'DISPONIBILIDADE DO ITEM',
+    'TIPO COMPLEMENTO',
+    'QTDE MINIMA',
+    'QTDE MAXIMA',
+    'CALCULO DOS COMPLEMENTOS',
+  ]);
+
+  scrapedData.forEach(categoryData => {
+    const categoryName = categoryData.categoryName;
+    csvData.push(['Categoria', categoryName]);
+
+    categoryData.productsCategory.forEach(productData => {
+      const productName = productData.title;
+      const productDescription = productData.descricao;
+      const productPrice = productData.priceNow;
+      const imgSrc = productData.imgSrc;
+
+      csvData.push(['Produto', productName, productDescription, productPrice,'', '', imgSrc]);
+
+      productData.complementsDict.forEach(complementData => {
+        const complementName = complementData.nameComplement;
+        const complementType = complementData.typeComplement;
+        const complementRequired = complementData.required ? 'Obrigatório' : 'Não';
+        const complementMinQtd = complementData.minQtd;
+        const complementMaxQtd = complementData.maxQtd;
+
+        csvData.push(['Complemento', complementName, '', '','', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
+
+        complementData.options.forEach(option => {
+          const optionName = option.optionTitle;
+          const optionPrice = option.optionPrice;
+          const optionMaxQtd = option.optionQtd;
+
+          csvData.push(['Opção', optionName, '', optionPrice, '', '','', '', '', '', '', optionMaxQtd]);
+        });
+      });
+    });
+  });
+
+  // Converter para CSV usando a biblioteca papaparse
+  const csv = Papa.unparse(csvData);
+
+  // Criar um Blob com o conteúdo CSV
+  const blob = new Blob([csv], { type: 'text/csv' });
+
+  // Criar um objeto URL para o Blob
+  const url = URL.createObjectURL(blob);
+
+  // Criar um link de download
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = 'planilha_produtos.csv'; // Nome do arquivo de download
+
+  // Anexar o link ao documento e simular um clique nele
+  document.body.appendChild(a);
+  a.click();
+
+  // Limpar e revogar o objeto URL
+  URL.revokeObjectURL(url);
+
+  // Remover o link após o download
+  document.body.removeChild(a);
+}
 
 // Exporta a instância da classe Scrapy para uso em popup.js
 window.scrapy = new Scrapy();
