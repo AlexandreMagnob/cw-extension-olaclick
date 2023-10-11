@@ -57,12 +57,13 @@ class Scrapy {
           await sleep(1000)
   
           let titleElement = document.querySelector('span.font-5');
-          let priceNowElement = document.querySelector('span.price__now.font-3');
+          let priceElement = document.querySelector('span.price__now.font-3');
           let imgElement = document.querySelector('img');
           let descricaoElement = document.querySelector('span.weight-400');
           console.log("extraindo dados")
           let title = titleElement ? titleElement.textContent : "";
-          let priceNow = priceNowElement ? priceNowElement.textContent : "";
+          let priceText = priceElement ? priceElement.textContent : "";
+          let price = priceText.replace(/[^\d,.]/g, '').replace(',', '.');
           let imgSrc = imgElement ? imgElement.src : "";
           let descricao = descricaoElement ? descricaoElement.textContent : "";
   
@@ -86,12 +87,13 @@ class Scrapy {
               let optionsElement = complementExpandable.querySelectorAll('.chooser');
               for await (const optionElement of optionsElement) {
                 let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
-                let optionPriceElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.price__now');
+                let optionPriceElement = optionElement.querySelector('.price__now');
                 let optionQtdElement = optionElement.querySelector('span.text-grey-3');
                 let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
   
                 let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
-                let optionPrice = optionPriceElement ? optionPriceElement.textContent : "0";
+                let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
+                let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
                 let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
                 let optionDescription = optionDescriptionElement ? optionDescriptionElement.textContent : "";
   
@@ -116,7 +118,7 @@ class Scrapy {
   
           productData.push({
             title: title,
-            priceNow: priceNow,
+            price: price,
             imgSrc: imgSrc,
             descricao: descricao,
             complementsDict: complementsDict

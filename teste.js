@@ -34,12 +34,13 @@ async function clickProductCards() {
         await sleep(1000)
 
         let titleElement = document.querySelector('span.font-5');
-        let priceNowElement = document.querySelector('span.price__now.font-3');
+        let priceElement = document.querySelector('span.price__now.font-3');
         let imgElement = document.querySelector('img');
         let descricaoElement = document.querySelector('span.weight-400');
         console.log("extraindo dados")
         let title = titleElement ? titleElement.textContent : "";
-        let priceNow = priceNowElement ? priceNowElement.textContent : "";
+        let priceText = priceElement ? priceElement.textContent : "";
+        let price = priceText.replace(/[^\d,.]/g, '').replace(',', '.');
         let imgSrc = imgElement ? imgElement.src : "";
         let descricao = descricaoElement ? descricaoElement.textContent : "";
 
@@ -63,12 +64,13 @@ async function clickProductCards() {
             let optionsElement = complementExpandable.querySelectorAll('.chooser');
             for await (const optionElement of optionsElement) {
               let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
-              let optionPriceElement = optionElement.querySelector('div.chooser:nth-of-type(1) span.price__now');
+              let optionPriceElement = optionElement.querySelector('.price__now');
               let optionQtdElement = optionElement.querySelector('span.text-grey-3');
               let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
 
               let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
-              let optionPrice = optionPriceElement ? optionPriceElement.textContent : "0";
+              let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
+              let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
               let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
               let optionDescription = optionDescriptionElement ? optionDescriptionElement.textContent : "";
 
@@ -93,7 +95,7 @@ async function clickProductCards() {
 
         productData.push({
           title: title,
-          priceNow: priceNow,
+          price: price,
           imgSrc: imgSrc,
           descricao: descricao,
           complementsDict: complementsDict
@@ -117,5 +119,63 @@ async function backPage() {
   if (back) {
     back.click()
   }
+
 }
 
+
+function createCSV() {
+  const Papa = require('papaparse');
+  const csvData = [];
+
+  // Cabeçalho do CSV
+  csvData.push([
+    'TIPO',
+    'NOME',
+    'DESCRIÇÃO',
+    'VALOR',
+    'IMAGEM',
+    'CODIGO PDV',
+    'DISPONIBILIDADE DO ITEM',
+    'TIPO COMPLEMENTO',
+    'QTDE MINIMA',
+    'QTDE MAXIMA',
+    'CALCULO DOS COMPLEMENTOS',
+  ]);
+
+  scrapedData.forEach(categoryData => {
+    const categoryName = categoryData.categoryName;
+    csvData.push(['Categoria', categoryName]);
+
+    categoryData.productsCategory.forEach(productData => {
+      const productName = productData.title;
+      const productDescription = productData.descricao;
+      const productPrice = productData.price;
+      const imgSrc = productData.imgSrc;
+
+      csvData.push(['Produto', productName, productDescription, productPrice, imgSrc]);
+
+      productData.complementsDict.forEach(complementData => {
+        const complementName = complementData.nameComplement;
+        const complementType = complementData.typeComplement;
+        const complementRequired = complementData.required ? 'Obrigatório' : 'Não';
+        const complementMinQtd = complementData.minQtd;
+        const complementMaxQtd = complementData.maxQtd;
+
+        csvData.push(['Complemento', complementName, '', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
+
+        complementData.options.forEach(option => {
+          const optionName = option.optionTitle;
+          const optionPrice = option.optionPrice;
+          const optionMaxQtd = option.optionQtd;
+
+          csvData.push(['Opção', optionName, '', optionPrice, '', '', '', '', '', optionMaxQtd]);
+        });
+      });
+    });
+  });
+
+  // Converter para CSV usando a biblioteca papaparse
+  const csv = Papa.unparse(csvData);
+
+  return csv;
+}
