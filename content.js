@@ -23,7 +23,16 @@ class Scrapy {
         await this.backPage()
       }
     }
-  
+    processTypeComplement(typeComplement) {
+      if (typeComplement === "Escolha 1 item") {
+        return ["Apenas uma opção ", 1, 1];
+      } else if (typeComplement.startsWith("Escolha até ")) {
+        const maxItems = parseInt(typeComplement.match(/\d+/)[0], 10);
+        return ['Mais de uma opção sem repetição', 1, maxItems];
+      } else {
+        return ["Apenas uma opção", 1, 1]; // Valor padrão se nenhum padrão for encontrado
+      }
+    }
 
   async clickProductCards() {
     await this.sleep(500)
@@ -181,10 +190,12 @@ function createCSV(scrapedData) {
     categoryData.productsCategory.forEach(productData => {
       const productName = productData.title;
       const productDescription = productData.descricao;
-      const productPrice = productData.priceNow;
+      const productPrice = productData.priceNow || ''; // Valor
+      const productCostPrice = productData.costPrice || ''; // Valor de Custo
+      const productPromoPrice = productData.promoPrice || ''; // Valor Promocional
       const imgSrc = productData.imgSrc;
 
-      csvData.push(['Produto', productName, productDescription, productPrice,'', '', imgSrc]);
+      csvData.push(['Produto', productName, productDescription, productPrice, productCostPrice, productPromoPrice, imgSrc]);
 
       productData.complementsDict.forEach(complementData => {
         const complementName = complementData.nameComplement;
@@ -193,11 +204,11 @@ function createCSV(scrapedData) {
         const complementMinQtd = complementData.minQtd;
         const complementMaxQtd = complementData.maxQtd;
 
-        csvData.push(['Complemento', complementName, '', '','', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
+        csvData.push(['Complemento', complementName, '', '','', '', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
 
         complementData.options.forEach(option => {
           const optionName = option.optionTitle;
-          const optionPrice = option.optionPrice;
+          const optionPrice = option.optionPrice || ''; // Valor da Opção
           const optionMaxQtd = option.optionQtd;
 
           csvData.push(['Opção', optionName, '', optionPrice, '', '','', '', '', '', '', optionMaxQtd]);
@@ -231,6 +242,7 @@ function createCSV(scrapedData) {
   // Remover o link após o download
   document.body.removeChild(a);
 }
+
 
 // Exporta a instância da classe Scrapy para uso em popup.js
 window.scrapy = new Scrapy();
