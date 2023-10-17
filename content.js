@@ -23,14 +23,35 @@ class Scrapy {
         await this.backPage()
       }
     }
-    processTypeComplement(typeComplement) {
+
+    checkRepetition(complementExpandable) {
+      const plusButton = complementExpandable.querySelector('div[data-v-57f45f1e][data-testid="btn-label"]');
+      
+      const counter = complementExpandable.querySelector('div[data-v-c8e7a86a][data-testid="counter"]');
+      plusButton.click();
+      plusButton.click();
+      
+      const counterValue = parseInt(counter.textContent, 10);
+      
+      if (counterValue > 1) {
+        return "com repetição";
+      } else {
+        return "sem repetição";
+      }
+    }
+
+    processTypeComplement(typeComplement, complementExpandable) {
+      let repetition = this.checkRepetition(complementExpandable)
       if (typeComplement === "Escolha 1 item") {
         return ["Apenas uma opção ", 1, 1];
       } else if (typeComplement.startsWith("Escolha até ")) {
         const maxItems = parseInt(typeComplement.match(/\d+/)[0], 10);
-        return ['Mais de uma opção sem repetição', 1, maxItems];
-      } else {
-        return ["Apenas uma opção", 1, 1]; // Valor padrão se nenhum padrão for encontrado
+        return ['Mais de uma opção ' + repetition, 1, maxItems];
+      } else if (typeComplement.match(/^Escolha de \d+ até \d+ itens$/)) {
+        const minMaxItems = typeComplement.match(/\d+/g);
+        const minItems = parseInt(minMaxItems[0], 10);
+        const maxItems = parseInt(minMaxItems[1], 10);
+        return ['Mais de uma opção ' + repetition, minItems, maxItems];
       }
     }
 
@@ -55,7 +76,6 @@ class Scrapy {
         let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
         let productCard = productCards[productIndex];
   
-        console.log(productCard.textContent); //debuging..
   
         let innerDiv = productCard.querySelector('.item-card-container.row.justify-between');
         if (innerDiv) {
@@ -87,8 +107,9 @@ class Scrapy {
               let typeComplementElement = complementElement.querySelector('span.expandable__fixed__header__text__subtitle.font-1.text-grey');
               let requiredElement = complementElement.querySelector('span.expandable__fixed__header__text__required.font-0.ml-2.text-primary');
               let complementNameElement = complementElement.querySelector('span.expandable__fixed__header__text__title');
-  
-              let typeComplement = typeComplementElement ? typeComplementElement.textContent : "";
+              
+              let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
+              let [typeComplement, minQtd, maxQtd] = this.processTypeComplement(typeComplementText, complementExpandable)
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
   
@@ -113,16 +134,16 @@ class Scrapy {
                   optionDescription: optionDescription
                 });
               }
-              console.log("options extraida")
   
               complementsDict.push({
                 nameComplement: complementName,
                 typeComplement: typeComplement,
+                minQtd: minQtd,
+                maxQtd: maxQtd,
                 required: required,
-                options: optionsComplement,
+                options: optionsComplement
               })
             }
-            console.log("complements extraida")
           }
   
           productData.push({
