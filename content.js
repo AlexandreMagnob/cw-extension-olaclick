@@ -184,7 +184,7 @@ function desativarAlerta() {
 // Chame a função desativarAlerta antes de executar outras ações
 desativarAlerta();
 
-function createCSV(scrapedData) {
+async function createCSV() {
   const csvData = [];
 
   // Cabeçalho do CSV
@@ -193,8 +193,6 @@ function createCSV(scrapedData) {
     'NOME',
     'DESCRIÇÃO',
     'VALOR',
-    'VALOR DE CUSTO',
-    'VALOR PROMOCIONAL',
     'IMAGEM',
     'CODIGO PDV',
     'DISPONIBILIDADE DO ITEM',
@@ -204,6 +202,8 @@ function createCSV(scrapedData) {
     'CALCULO DOS COMPLEMENTOS',
   ]);
 
+  const scrapedData = window.scrapy.scrapedData; // Obtém os dados diretamente da instância
+
   scrapedData.forEach(categoryData => {
     const categoryName = categoryData.categoryName;
     csvData.push(['Categoria', categoryName]);
@@ -211,12 +211,17 @@ function createCSV(scrapedData) {
     categoryData.productsCategory.forEach(productData => {
       const productName = productData.title;
       const productDescription = productData.descricao;
-      const productPrice = productData.priceNow || ''; // Valor
-      const productCostPrice = productData.costPrice || ''; // Valor de Custo
-      const productPromoPrice = productData.promoPrice || ''; // Valor Promocional
+      const productPrice = productData.priceNow || '';
       const imgSrc = productData.imgSrc;
+      const codigoPdv = ''; // Adicione o código PDV aqui, se disponível
 
-      csvData.push(['Produto', productName, productDescription, productPrice, productCostPrice, productPromoPrice, imgSrc]);
+      // Preencha os campos de código PDV e disponibilidade do item, se disponíveis
+      if (codigoPdv && productData.disponibilidade) {
+        const disponibilidade = productData.disponibilidade;
+        csvData.push(['Produto', productName, productDescription, productPrice, imgSrc, codigoPdv, disponibilidade]);
+      } else {
+        csvData.push(['Produto', productName, productDescription, productPrice, imgSrc]);
+      }
 
       productData.complementsDict.forEach(complementData => {
         const complementName = complementData.nameComplement;
@@ -225,19 +230,19 @@ function createCSV(scrapedData) {
         const complementMinQtd = complementData.minQtd;
         const complementMaxQtd = complementData.maxQtd;
 
-        csvData.push(['Complemento', complementName, '', '','', '', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
+        csvData.push(['Complemento', complementName, '', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
 
         complementData.options.forEach(option => {
           const optionName = option.optionTitle;
-          const optionPrice = option.optionPrice || ''; // Valor da Opção
+          const optionPrice = option.optionPrice || '';
           const optionMaxQtd = option.optionQtd;
 
-          csvData.push(['Opção', optionName, '', optionPrice, '', '','', '', '', '', '', optionMaxQtd]);
+          csvData.push(['Opção', optionName, '', optionPrice, '', '', '', '', '', optionMaxQtd]);
         });
       });
     });
   });
-
+  
   // Converter para CSV usando a biblioteca papaparse
   const csv = Papa.unparse(csvData);
 
