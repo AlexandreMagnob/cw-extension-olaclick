@@ -15,6 +15,8 @@ function createCSVFromJSON(jsonFilePath) {
       'NOME',
       'DESCRIÇÃO',
       'VALOR',
+      'VALOR DE CUSTO',
+      'VALOR PROMOCIONAL',
       'IMAGEM',
       'CODIGO PDV',
       'DISPONIBILIDADE DO ITEM',
@@ -40,7 +42,7 @@ function createCSVFromJSON(jsonFilePath) {
           const disponibilidade = productData.disponibilidade;
           csvData.push(['Produto', productName, productDescription, productPrice, imgSrc, codigoPdv, disponibilidade]);
         } else {
-          csvData.push(['Produto', productName, productDescription, productPrice, imgSrc]);
+          csvData.push(['Produto', productName, productDescription, productPrice, '', '', imgSrc]);
         }
 
         productData.complementsDict.forEach(complementData => {
@@ -50,14 +52,14 @@ function createCSVFromJSON(jsonFilePath) {
           const complementMinQtd = complementData.minQtd;
           const complementMaxQtd = complementData.maxQtd;
 
-          csvData.push(['Complemento', complementName, '', '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
+          csvData.push(['Complemento', complementName, '', '', '',  '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
 
           complementData.options.forEach(option => {
             const optionName = option.optionTitle;
             const optionPrice = option.optionPrice;
-            const optionMaxQtd = option.optionQtd;
-
-            csvData.push(['Opção', optionName, '', optionPrice, '', '', '', '', '', optionMaxQtd]);
+            //const optionMaxQtd = option.optionQtd;
+            const optionDescription = option.optionDescription
+            csvData.push(['Opcao', optionName, optionDescription, optionPrice, '', '', '', '', '', '', '', '']);
           });
         });
       });
@@ -66,7 +68,7 @@ function createCSVFromJSON(jsonFilePath) {
     // Gerar a string CSV
     const csv = Papa.unparse(csvData);
 
-    // Especifique o caminho onde você deseja salvar o arquivo CSV
+    // Especifique o caminho onde você deseja salvar o arquivo CSVS
     const csvFilePath = 'explosao_acai.csv';
 
     // Escrever o conteúdo do CSV no arquivo
