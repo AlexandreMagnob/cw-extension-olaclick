@@ -1,13 +1,12 @@
-// Adicione um listener para mensagens
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.action === 'dadosColetados') {
-    const dados = message.dados;
-    // Faça algo com os dados recebidos
-  }
+document.addEventListener('DOMContentLoaded', function () {
+  const coletarDadosButton = document.getElementById('coletarDados');
+  coletarDadosButton.addEventListener('click', async function () {
+
+      var message = { text: 'hi' };
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, message);
+      });
+      
+  });
+
 });
-
-
-function sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
-
-
-

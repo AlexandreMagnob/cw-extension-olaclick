@@ -1,11 +1,14 @@
 class Scrapy {
   constructor() {
     this.scrapedData = [];
+    this.title = null
   }
 
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
   async checkAndScrape() {
+    await this.sleep(200);
+    this.title = document.querySelector('.company-header__info__company span').textContent
     const categoryCards = document.querySelectorAll('div.category-card');
     console.log(categoryCards)
     if (categoryCards.length > 0) {
@@ -29,14 +32,13 @@ class Scrapy {
     }
 
     checkRepetition(complementExpandable) {
-      const plusButton = complementExpandable.querySelector('div[data-v-57f45f1e][data-testid="btn-label"]');
-      
-      const counter = complementExpandable.querySelector('div[data-v-c8e7a86a][data-testid="counter"]');
+      const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
+      const plusButton = chooserDiv.querySelectorAll('button.btn.radius-1.font-10.no-user-select.btn-container')[1];      
       plusButton.click();
       plusButton.click();
       
+      const counter = chooserDiv.querySelector('.px-2.font-3.row-center');
       const counterValue = parseInt(counter.textContent, 10);
-      
       if (counterValue > 1) {
         return "com repeticao";
       } else {
@@ -167,6 +169,7 @@ class Scrapy {
       console.log("scrapedData adicionado")
       await this.backPage();
     }
+    alert("Finalizado!")
 }
 
 
@@ -190,7 +193,13 @@ desativarAlerta();
 // Exporta a instância da classe Scrapy para uso em popup.js
 window.scrapy = new Scrapy();
 
-// content.js
+chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+  if (request.text === 'hi') {
+      await window.scrapy.checkAndScrape();
+      const scrapedData = window.scrapy.scrapedData
+      const title = window.scrapy.title
+      await createCSV(scrapedData, title)
+  }
+});
 
-
-
+console.log("Olá")

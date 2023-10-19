@@ -69,7 +69,7 @@ function createCSVFromJSON(jsonFilePath) {
     const csv = Papa.unparse(csvData);
 
     // Especifique o caminho onde você deseja salvar o arquivo CSVS
-    const csvFilePath = 'explosao_acai.csv';
+    const csvFilePath = 'smart_pizzaria.csv';
 
     // Escrever o conteúdo do CSV no arquivo
     fs.writeFileSync(csvFilePath, csv, 'utf8');
