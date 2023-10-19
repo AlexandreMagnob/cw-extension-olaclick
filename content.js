@@ -1,16 +1,16 @@
 class Scrapy {
   constructor() {
     this.scrapedData = [];
-    this.title = null
+    this.title = ""
   }
 
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
   async checkAndScrape() {
     await this.sleep(200);
-    this.title = document.querySelector('.company-header__info__company span').textContent
+    this.title = document.querySelector('.company-header__info__company span') ? document.querySelector('.company-header__info__company span').textContent : "";
+    console.log(this.title)
     const categoryCards = document.querySelectorAll('div.category-card');
-    console.log(categoryCards)
     if (categoryCards.length > 0) {
       await this.clickCategoryCards();
     } else {
@@ -31,12 +31,12 @@ class Scrapy {
       }
     }
 
-    checkRepetition(complementExpandable) {
+    async checkRepetition(complementExpandable) {
       const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
       const plusButton = chooserDiv.querySelectorAll('button.btn.radius-1.font-10.no-user-select.btn-container')[1];      
       plusButton.click();
       plusButton.click();
-      
+      await this.sleep(200)
       const counter = chooserDiv.querySelector('.px-2.font-3.row-center');
       const counterValue = parseInt(counter.textContent, 10);
       if (counterValue > 1) {
@@ -46,8 +46,8 @@ class Scrapy {
       }
     }
 
-    processTypeComplement(typeComplement, complementExpandable) {
-      let repetition = this.checkRepetition(complementExpandable)
+    async processTypeComplement(typeComplement, complementExpandable) {
+      let repetition = await this.checkRepetition(complementExpandable)
       if (typeComplement === "Escolha 1 item") {
         return ["Apenas uma opcao ", 1, 1];
       } else if (typeComplement.startsWith("Escolha até ")) {
@@ -115,7 +115,7 @@ class Scrapy {
               let complementNameElement = complementElement.querySelector('span.expandable__fixed__header__text__title');
               
               let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
-              let [typeComplement, minQtd, maxQtd] = this.processTypeComplement(typeComplementText, complementExpandable)
+              let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
   
@@ -201,5 +201,3 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
       await createCSV(scrapedData, title)
   }
 });
-
-console.log("Olá")
