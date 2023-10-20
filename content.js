@@ -1,15 +1,15 @@
 class Scrapy {
   constructor() {
     this.scrapedData = [];
-    this.title = ""
+    this.titleRestaurant = ""
   }
 
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
   async checkAndScrape() {
-    await this.sleep(200);
-    this.title = document.querySelector('.company-header__info__company span') ? document.querySelector('.company-header__info__company span').textContent : "";
-    console.log(this.title)
+    await this.sleep(500);
+    this.titleRestaurant = document.querySelector('.company-header__info__company span') ? document.querySelector('.company-header__info__company span').textContent : "";
+    //console.log(this.titleRestaurant)
     const categoryCards = document.querySelectorAll('div.category-card');
     if (categoryCards.length > 0) {
       await this.clickCategoryCards();
@@ -21,12 +21,14 @@ class Scrapy {
   async clickCategoryCards() {
     let categoryCards = document.querySelectorAll('div.category-card');
     for await (const categoryCardIndex of [...Array(categoryCards.length).keys()]) {
-        this.sleep(400)
+        this.sleep(500)
         let categoryCards = document.querySelectorAll('div.category-card');
+        console.log(categoryCards)
         let categoryCard = categoryCards[categoryCardIndex]
+        await this.sleep(1000)
         categoryCard.click();
-        await this.sleep(200)
-        await this.clickProductCards();
+        //await this.clickProductCards();
+        await this.sleep(500)
         await this.backPage()
       }
     }
@@ -47,30 +49,52 @@ class Scrapy {
     }
 
     async processTypeComplement(typeComplement, complementExpandable) {
-      let repetition = await this.checkRepetition(complementExpandable)
-      if (typeComplement === "Escolha 1 item") {
-        return ["Apenas uma opcao ", 1, 1];
-      } else if (typeComplement.startsWith("Escolha até ")) {
-        const maxItems = parseInt(typeComplement.match(/\d+/)[0], 10);
-        return ['Mais de uma opcao ' + repetition, 0, maxItems];
-      } else if (typeComplement.match(/^Escolha de \d+ até \d+ itens$/)) {
-        const minMaxItems = typeComplement.match(/\d+/g);
+      const complement = typeComplement !== "" ? typeComplement : "";
+      let repetition = await this.checkRepetition(complementExpandable);
+      let type = "";
+      let minQtd = 0;
+      let maxQtd = 0;
+    
+      if (complement.match(/^Escolha (\d+) itens/)) {
+        const itemCount = parseInt(complement.match(/^Escolha (\d+) itens/)[1], 10);
+        if (itemCount !== 1) {
+          type = 'Mais de uma opcao ' + repetition;
+          minQtd = itemCount;
+          maxQtd = itemCount;
+          console.log(minQtd,maxQtd)
+        } else {
+          type = "Apenas uma opcao";
+          minQtd = 1;
+          maxQtd = 1;
+          console.log(minQtd,maxQtd)
+        }
+      } else if (complement.startsWith("Escolha até ")) {
+        const maxItems = parseInt(complement.match(/\d+/)[0], 10);
+        type = 'Mais de uma opcao ' + repetition;
+        maxQtd = maxItems;
+      } else if (complement.match(/^Escolha de \d+ até \d+ itens$/)) {
+        const minMaxItems = complement.match(/\d+/g);
         const minItems = parseInt(minMaxItems[0], 10);
         const maxItems = parseInt(minMaxItems[1], 10);
-        return ['Mais de uma opcao ' + repetition, minItems, maxItems];
+        type = 'Mais de uma opcao ' + repetition;
+        minQtd = minItems;
+        maxQtd = maxItems;
       }
+      console.log(type)
+      return [type, minQtd, maxQtd];
     }
+    
 
   async clickProductCards() {
     console.log("executando..")
     await this.sleep(500)
-    let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
+    let categoryDivs = document.querySelectorAll('.category-container');
   
     for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
       await this.sleep(500)
-      let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
+      let categoryDivs = document.querySelectorAll('.category-container');
       let categoryDiv = categoryDivs[categoryIndex];
-      let categoryNameElement = categoryDiv.querySelector('span[data-v-c24acdb4]');
+      let categoryNameElement = categoryDiv.querySelector('span');
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
   
       let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
@@ -78,7 +102,7 @@ class Scrapy {
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
         await this.sleep(500)
-        let categoryDivs = document.querySelectorAll('.category-container[data-v-c24acdb4]');
+        let categoryDivs = document.querySelectorAll('.category-container');
         let categoryDiv = categoryDivs[categoryIndex];
         let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
         let productCard = productCards[productIndex];
@@ -88,19 +112,20 @@ class Scrapy {
         if (innerDiv) {
           await this.sleep(500)
           innerDiv.click();
-          console.log("clicou")
           // Agora, vamos adicionar um atraso antes de coletar os dados.
           await this.sleep(1000)
   
           let titleElement = document.querySelector('span.font-5');
+          console.log(titleElement)
           let priceElement = document.querySelector('span.price__now.font-3');
           let imgElement = document.querySelector('img');
           let descricaoElement = document.querySelector('span.weight-400');
-          let title = titleElement ? titleElement.textContent : "";
+          let productTitle = titleElement ? titleElement.textContent : "";
+          console.log(productTitle)
           let priceText = priceElement ? priceElement.textContent : "";
-          let price = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
+          let productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
           let imgSrc = imgElement ? imgElement.src : "";
-          let descricao = descricaoElement ? descricaoElement.textContent : "";
+          let productDescricao = descricaoElement ? descricaoElement.textContent : "";
   
           let complementsDict = []
           let complementExpandables = document.querySelectorAll('div.expandable');
@@ -118,7 +143,6 @@ class Scrapy {
               let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
-  
               // Pegar nome de cada opção do complemento da iteração
               let optionsElement = complementExpandable.querySelectorAll('.chooser');
               for await (const optionElement of optionsElement) {
@@ -152,13 +176,12 @@ class Scrapy {
           }
   
           productData.push({
-            title: title,
-            price: price,
+            title: productTitle,
+            price: productPrice,
             imgSrc: imgSrc,
-            descricao: descricao,
+            descricao: productDescricao,
             complementsDict: complementsDict
           });
-          console.log("productData extraido")
           await this.backPage();
         }
       }
@@ -166,7 +189,6 @@ class Scrapy {
         categoryName: categoryName,
         productsCategory: productData
       });
-      console.log("scrapedData adicionado")
       await this.backPage();
     }
     alert("Finalizado!")
@@ -175,7 +197,7 @@ class Scrapy {
 
 async backPage() {
   await this.sleep(1000);
-  let back = document.querySelector('#app > div.main-container.w-100.not-small.has-search-bar > div > div.w-100.item-header-container > div.navigation-header.flex.items-center.justify-between.navigation-header--small.bg-white > div:nth-child(1) > div > div');
+  let back = document.querySelector('.navigation-header__back')
   if (back) {
     back.click()
 }}
@@ -197,7 +219,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
   if (request.text === 'hi') {
       await window.scrapy.checkAndScrape();
       const scrapedData = window.scrapy.scrapedData
-      const title = window.scrapy.title
-      await createCSV(scrapedData, title)
+      const titleRestaurant = window.scrapy.titleRestaurant
+      await createCSV(scrapedData, titleRestaurant)
   }
 });
