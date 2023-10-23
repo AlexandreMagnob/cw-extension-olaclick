@@ -61,14 +61,13 @@ class Scrapy {
           type = 'Mais de uma opcao ' + repetition;
           minQtd = itemCount;
           maxQtd = itemCount;
-          console.log(minQtd,maxQtd)
-        } else {
-          type = "Apenas uma opcao";
-          minQtd = 1;
-          maxQtd = 1;
-          console.log(minQtd,maxQtd)
-        }
-      } else if (complement.startsWith("Escolha até ")) {
+          console.log(minQtd,maxQtd)}
+      }else if(complement == "Escolha 1 item"){
+        type = "Apenas uma opção";
+        minQtd = 1;
+        maxQtd = 1;
+      }
+      else if (complement.startsWith("Escolha até ")) {
         const maxItems = parseInt(complement.match(/\d+/)[0], 10);
         type = 'Mais de uma opcao ' + repetition;
         maxQtd = maxItems;
