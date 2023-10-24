@@ -1,15 +1,6 @@
-const fs = require('fs');
-const Papa = require('papaparse');
-
-function createCSVFromJSON(jsonFilePath) {
-  try {
-    // Lê o arquivo JSON
-    const jsonData = fs.readFileSync(jsonFilePath, 'utf8');
-    const data = JSON.parse(jsonData);
-
+async function createCSV(data, name) {
     const csvData = [];
-
-    // Cabeçalho do CSV
+  
     csvData.push([
       'TIPO',
       'NOME',
@@ -25,18 +16,20 @@ function createCSVFromJSON(jsonFilePath) {
       'QTDE MAXIMA',
       'CALCULO DOS COMPLEMENTOS',
     ]);
-
-    data.forEach(categoryData => {
+  
+    const scrapedData = data;
+  
+    scrapedData.forEach(categoryData => {
       const categoryName = categoryData.categoryName;
       csvData.push(['Categoria', categoryName]);
-
+  
       categoryData.productsCategory.forEach(productData => {
         const productName = productData.title;
         const productDescription = productData.descricao;
         const productPrice = productData.price;
         const imgSrc = productData.imgSrc;
         const codigoPdv = ''; // Adicione o código PDV aqui, se tiver
-
+  
         // Preencha os campos de código PDV e disponibilidade do item, se disponíveis
         if (codigoPdv && productData.disponibilidade) {
           const disponibilidade = productData.disponibilidade;
@@ -44,16 +37,16 @@ function createCSVFromJSON(jsonFilePath) {
         } else {
           csvData.push(['Produto', productName, productDescription, productPrice, '', '', imgSrc]);
         }
-
+  
         productData.complementsDict.forEach(complementData => {
           const complementName = complementData.nameComplement;
           const complementType = complementData.typeComplement;
           const complementRequired = complementData.required ? 'Obrigatório' : 'Não';
           const complementMinQtd = complementData.minQtd;
           const complementMaxQtd = complementData.maxQtd;
-
+  
           csvData.push(['Complemento', complementName, '', '', '',  '', '', '', '', complementType, complementMinQtd, complementMaxQtd]);
-
+  
           complementData.options.forEach(option => {
             const optionName = option.optionTitle;
             const optionPrice = option.optionPrice;
@@ -64,23 +57,33 @@ function createCSVFromJSON(jsonFilePath) {
         });
       });
     });
-
-    // Gerar a string CSV
+  
+    
+    // Converter para CSV usando a biblioteca papaparse
     const csv = Papa.unparse(csvData);
+  
+    // Criar um Blob com o conteúdo CSV
+    const blob = new Blob([csv], { type: 'text/csv' });
+  
+    // Criar um objeto URL para o Blob
+    const url = URL.createObjectURL(blob);
+  
+    // Criar um link de download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
 
-    // Especifique o caminho onde você deseja salvar o arquivo CSVS
-    const csvFilePath = 'smart_pizzaria.csv';
+    const fileName = name !== "" ? name : "planilha_produto";
 
-    // Escrever o conteúdo do CSV no arquivo
-    fs.writeFileSync(csvFilePath, csv, 'utf8');
-    console.log('Arquivo CSV criado com sucesso em:', csvFilePath);
-  } catch (error) {
-    console.error('Erro ao processar o arquivo JSON:', error);
+    a.download = `${fileName}.csv`; // Nome do arquivo de download
+  
+    // Anexar o link ao documento e simular um clique nele
+    document.body.appendChild(a);
+    a.click();
+  
+    // Limpar e revogar o objeto URL
+    URL.revokeObjectURL(url);
+  
+    // Remover o link após o download
+    document.body.removeChild(a);
   }
-}
-
-// Especifique o caminho para o arquivo JSON com os dados
-const jsonFilePath = 'a.json'; // Substitua pelo caminho do seu arquivo JSON
-
-// Chame a função para criar o arquivo CSV
-createCSVFromJSON(jsonFilePath);
