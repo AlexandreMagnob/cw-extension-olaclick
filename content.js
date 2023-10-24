@@ -6,33 +6,6 @@ class Scrapy {
 
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
-  async checkAndScrape() {
-    await this.sleep(500);
-    this.titleRestaurant = document.querySelector('.company-header__info__company span') ? document.querySelector('.company-header__info__company span').textContent : "";
-    //console.log(this.titleRestaurant)
-    const categoryCards = document.querySelectorAll('div.category-card');
-    if (categoryCards.length > 0) {
-      await this.clickCategoryCards();
-    } else {
-      await this.clickProductCards();
-    }
-  }
-
-  async clickCategoryCards() {
-    let categoryCards = document.querySelectorAll('div.category-card');
-    for await (const categoryCardIndex of [...Array(categoryCards.length).keys()]) {
-        this.sleep(500)
-        let categoryCards = document.querySelectorAll('div.category-card');
-        console.log(categoryCards)
-        let categoryCard = categoryCards[categoryCardIndex]
-        await this.sleep(1000)
-        categoryCard.click();
-        //await this.clickProductCards();
-        await this.sleep(500)
-        await this.backPage()
-      }
-    }
-
     async checkRepetition(complementExpandable) {
       const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
       const plusButton = chooserDiv.querySelectorAll('button.btn.radius-1.font-10.no-user-select.btn-container')[1];      
@@ -87,38 +60,39 @@ class Scrapy {
   async clickProductCards() {
     console.log("executando..")
     await this.sleep(500)
-    let categoryDivs = document.querySelectorAll('.category-container');
+    let categoryDivs = document.querySelectorAll('.panel.panel-danger')
   
     for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
       await this.sleep(500)
-      let categoryDivs = document.querySelectorAll('.category-container');
+      let categoryDivs = document.querySelectorAll('.panel.panel-danger')
       let categoryDiv = categoryDivs[categoryIndex];
-      let categoryNameElement = categoryDiv.querySelector('span');
+      let categoryNameElement = categoryDiv.querySelector('.truncate-overflow')
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
   
-      let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
+      let productCards = categoryDiv.querySelectorAll('.product-container');
   
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
         await this.sleep(500)
-        let categoryDivs = document.querySelectorAll('.category-container');
+        let categoryDivs = document.querySelectorAll('.panel.panel-danger')
         let categoryDiv = categoryDivs[categoryIndex];
-        let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
+        let productCards = categoryDiv.querySelectorAll('.product-container');
         let productCard = productCards[productIndex];
   
+        let priceElement = productCard.querySelector('.price');
   
-        let innerDiv = productCard.querySelector('.item-card-container.row.justify-between');
+        let innerDiv = productCard.querySelector('.product-item');
         if (innerDiv) {
           await this.sleep(500)
           innerDiv.click();
+
           // Agora, vamos adicionar um atraso antes de coletar os dados.
           await this.sleep(1000)
-  
-          let titleElement = document.querySelector('span.font-5');
+          let productModal = document.querySelector('.modal-dialog');
+          let titleElement = productModal.querySelector('#produtoModalNome');
           console.log(titleElement)
-          let priceElement = document.querySelector('span.price__now.font-3');
-          let imgElement = document.querySelector('img');
-          let descricaoElement = document.querySelector('span.weight-400');
+          let imgElement = productModal.querySelector('#produtoModalImagePath');
+          let descricaoElement = productModal.querySelector('#produtoModalDescricao')
           let productTitle = titleElement ? titleElement.textContent : "";
           console.log(productTitle)
           let priceText = priceElement ? priceElement.textContent : "";
@@ -127,35 +101,40 @@ class Scrapy {
           let productDescricao = descricaoElement ? descricaoElement.textContent : "";
   
           let complementsDict = []
-          let complementExpandables = document.querySelectorAll('div.expandable');
+          let complementExpandables = productModal.querySelectorAll('.panel.panel-danger')
           for await (const complementExpandable of complementExpandables) {
-            let complementElements = complementExpandable.querySelectorAll('div.expandable__fixed.py-2.px-4.pointer.bg-grey-12');
+            let complementElements = complementExpandable.querySelector('.panel-heading')
             let optionsComplement = [];
   
             // Pegar o nome de cada complemento
             for await (const complementElement of complementElements) {
-              let typeComplementElement = complementElement.querySelector('span.expandable__fixed__header__text__subtitle.font-1.text-grey');
-              let requiredElement = complementElement.querySelector('span.expandable__fixed__header__text__required.font-0.ml-2.text-primary');
-              let complementNameElement = complementElement.querySelector('span.expandable__fixed__header__text__title');
+              let typeComplementElement = complementElement.querySelector('small');
+              let complementNameElement = complementElement.querySelector('.panel-title');
               
               let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
               let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
               // Pegar nome de cada opção do complemento da iteração
-              let optionsElement = complementExpandable.querySelectorAll('.chooser');
+              let optionsElement = complementExpandable.querySelectorAll('.radio,.pb.pt.clearfix');
               for await (const optionElement of optionsElement) {
-                let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
-                let optionPriceElement = optionElement.querySelector('.price__now');
-                //let optionQtdElement = optionElement.querySelector('span.text-grey-3');
-                let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
-  
-                let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
-                let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
-                //let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
-                let optionDescription = optionDescriptionElement ? optionDescriptionElement.textContent : "";
-  
+                if(optionElement.className == 'pb pt clearfix'){
+
+                }
+                else if(optionElement.className == 'radio c-radio c-right clearfix mb-lg mt-lg'){
+                  
+                }
+                  let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
+                  let optionPriceElement = optionElement.querySelector('.price__now');
+                  //let optionQtdElement = optionElement.querySelector('span.text-grey-3');
+                  let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
+    
+                  let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
+                  let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
+                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  //let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
+                  let optionDescription = optionDescriptionElement ? optionDescriptionElement.textContent : "";
+    
                 optionsComplement.push({
                   optionTitle: optionTitle,
                   optionPrice: optionPrice,
@@ -202,14 +181,6 @@ async backPage() {
 }}
 }
 
-function desativarAlerta() {
-  const alertContainer = document.querySelector('[data-testid="alert-container"]');
-  if (alertContainer) {
-    alertContainer.remove();
-  }
-}
-// Chame a função desativarAlerta antes de executar outras ações
-desativarAlerta();
 
 // Exporta a instância da classe Scrapy para uso em popup.js
 window.scrapy = new Scrapy();
