@@ -35,15 +35,17 @@ class Scrapy {
           minQtd = itemCount;
           maxQtd = itemCount;
           console.log(minQtd,maxQtd)}
-      }else if(complement == "Escolha 1 item"){
-        type = "Apenas uma opção";
-        minQtd = 1;
-        maxQtd = 1;
+
+        }else if(complement == "Escolha 1 item"){
+          type = "Apenas uma opção";
+          minQtd = 1;
+          maxQtd = 1;
       }
       else if (complement.startsWith("Escolha até ")) {
         const maxItems = parseInt(complement.match(/\d+/)[0], 10);
         type = 'Mais de uma opcao ' + repetition;
         maxQtd = maxItems;
+
       } else if (complement.match(/^Escolha de \d+ até \d+ itens$/)) {
         const minMaxItems = complement.match(/\d+/g);
         const minItems = parseInt(minMaxItems[0], 10);
@@ -119,6 +121,12 @@ class Scrapy {
               let optionsElement = complementExpandable.querySelectorAll('.radio,.pb.pt.clearfix');
               for await (const optionElement of optionsElement) {
                 if(optionElement.className == 'pb pt clearfix'){
+                  let = optionTitleElement = optionElement.querySelector('label');
+                  let = optionPriceElement = optionElement.querySelector('.pull-right');
+
+                  let = optionTitle = optionTitleElement.textContent.trim()
+                  let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
+                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
 
                 }
                 else if(optionElement.className == 'radio c-radio c-right clearfix mb-lg mt-lg'){
