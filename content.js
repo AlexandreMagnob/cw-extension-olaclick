@@ -21,17 +21,31 @@ class Scrapy {
   async clickCategoryCards() {
     let categoryCards = document.querySelectorAll('div.category-card');
     for await (const categoryCardIndex of [...Array(categoryCards.length).keys()]) {
-        this.sleep(500)
+        await this.sleep(500)
+        /*
+        while (document.querySelectorAll('div.category-card').length <= categoryCardIndex) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }*/
+
         let categoryCards = document.querySelectorAll('div.category-card');
-        console.log(categoryCards)
         let categoryCard = categoryCards[categoryCardIndex]
+        console.log({categoryCards, categoryCard})
         await this.sleep(1000)
         categoryCard.click();
-        //await this.clickProductCards();
+        await this.sleep(500)
+        await this.clickProductCards();
+        /*
+        while (true) {
+            if (await this.clickProductCards()) {
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }*/
         await this.sleep(500)
         await this.backPage()
-      }
+        
     }
+  }
 
     async checkRepetition(complementExpandable) {
       const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
@@ -86,13 +100,14 @@ class Scrapy {
 
   async clickProductCards() {
     console.log("executando..")
-    await this.sleep(500)
+    await this.sleep(1000)
     let categoryDivs = document.querySelectorAll('.category-container');
   
     for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
       await this.sleep(500)
       let categoryDivs = document.querySelectorAll('.category-container');
       let categoryDiv = categoryDivs[categoryIndex];
+      
       let categoryNameElement = categoryDiv.querySelector('span');
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
   
@@ -100,13 +115,18 @@ class Scrapy {
   
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
-        await this.sleep(500)
+        await this.sleep(1000)
         let categoryDivs = document.querySelectorAll('.category-container');
         let categoryDiv = categoryDivs[categoryIndex];
-        let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
+        console.log({categoryDivs,categoryDiv})
+        let productCards = categoryDiv.querySelectorAll((".category-container__products__product-list.col-md-6.col-12.not-small"));
         let productCard = productCards[productIndex];
-  
-  
+        
+        if (productCard.style.display === "none") {
+          // Se o estilo for "display: none;", pule este productCard
+          continue;
+      }
+
         let innerDiv = productCard.querySelector('.item-card-container.row.justify-between');
         if (innerDiv) {
           await this.sleep(500)
@@ -190,7 +210,7 @@ class Scrapy {
       });
       await this.backPage();
     }
-    alert("Finalizado!")
+    //alert("Finalizado!")
 }
 
 
@@ -218,6 +238,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
   if (request.text === 'hi') {
       await window.scrapy.checkAndScrape();
       const scrapedData = window.scrapy.scrapedData
+      alert("Finalizado")
       const titleRestaurant = window.scrapy.titleRestaurant
       await createCSV(scrapedData, titleRestaurant)
   }
