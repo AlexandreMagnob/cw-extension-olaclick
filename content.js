@@ -107,11 +107,11 @@ class Scrapy {
       await this.sleep(500)
       let categoryDivs = document.querySelectorAll('.category-container');
       let categoryDiv = categoryDivs[categoryIndex];
-      
+      console.log(categoryDivs.length)
       let categoryNameElement = categoryDiv.querySelector('span');
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-  
-      let productCards = categoryDiv.querySelectorAll('.item-card.col-8.category-container__products__product-list__item-card.not-small');
+      console.log(categoryName)
+      let productCards = categoryDiv.querySelectorAll(".category-container__products__product-list.col-md-6.col-12.not-small");
   
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
@@ -133,12 +133,12 @@ class Scrapy {
           innerDiv.click();
           // Agora, vamos adicionar um atraso antes de coletar os dados.
           await this.sleep(1000)
-  
-          let titleElement = document.querySelector('span.font-5');
+          let productContainer = document.querySelector('.item-header-container__item.pt-3.justify-evenly')
+          let titleElement = productContainer.querySelector('span.font-5');
           console.log(titleElement)
-          let priceElement = document.querySelector('span.price__now.font-3');
-          let imgElement = document.querySelector('img');
-          let descricaoElement = document.querySelector('span.weight-400');
+          let priceElement = productContainer.querySelector('span.price__now.font-3');
+          let imgElement = productContainer.querySelector('img');
+          let descricaoElement = productContainer.querySelector('span.weight-400');
           let productTitle = titleElement ? titleElement.textContent : "";
           console.log(productTitle)
           let priceText = priceElement ? priceElement.textContent : "";
