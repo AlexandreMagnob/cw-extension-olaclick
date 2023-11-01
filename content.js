@@ -118,31 +118,26 @@ class Scrapy {
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
               // Pegar nome de cada opção do complemento da iteração
-              let optionsElement = complementExpandable.querySelectorAll('.radio,.pb.pt.clearfix');
+              let optionsElement = complementExpandabledocument.querySelectorAll('.checkbox,.radio,.pb.pt.clearfix');
               for await (const optionElement of optionsElement) {
-                if(optionElement.className == 'pb pt clearfix'){
-                  let = optionTitleElement = optionElement.querySelector('label');
-                  let = optionPriceElement = optionElement.querySelector('.pull-right');
-
-                  let = optionTitle = optionTitleElement.textContent.trim()
+                if (optionElement.classList.contains('radio')) {
+                  // Se a classe for 'radio', trata como um rádio.
+                  let optionTitleElement = optionElement.querySelector('label');
+                  let optionPriceElement = optionElement.querySelector('.pull-right');
+              
+                  let optionTitle = optionTitleElement.textContent.trim();
                   let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
                   let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
-
+                } else if (optionElement.classList.contains('pb') && optionElement.classList.contains('pt')) {
+                  // Se a classe contiver 'pb' e 'pt', trata como outra coisa.
+                  let priceElement = optionElement.querySelector('b');
+                  let priceText = priceElement ? priceElement.textContent : "";
+                  let price = priceText.replace(/[^\d,.]/g, '').replace(',', '.');
                 }
-                else if(optionElement.className == 'radio c-radio c-right clearfix mb-lg mt-lg'){
+                else if (optionElement.classList.contains('checkbox')){
                   
                 }
-                  let optionTitleElement = optionElement.querySelector('span.weight-700.text-black.font-1.mb-1');
-                  let optionPriceElement = optionElement.querySelector('.price__now');
-                  //let optionQtdElement = optionElement.querySelector('span.text-grey-3');
-                  let optionDescriptionElement = optionElement.querySelector('.chooser-info__description');
-    
-                  let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
-                  let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
-                  //let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
-                  let optionDescription = optionDescriptionElement ? optionDescriptionElement.textContent : "";
-    
+
                 optionsComplement.push({
                   optionTitle: optionTitle,
                   optionPrice: optionPrice,
