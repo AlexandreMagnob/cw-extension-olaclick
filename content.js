@@ -133,7 +133,7 @@ class Scrapy {
           innerDiv.click();
           // Agora, vamos adicionar um atraso antes de coletar os dados.
           await this.sleep(1000)
-          let productContainer = document.querySelector('.item-header-container__item.pt-3.justify-evenly')
+          let productContainer = document.querySelector('.item-header-container')
           let titleElement = productContainer.querySelector('span.font-5');
           console.log(titleElement)
           let priceElement = productContainer.querySelector('span.price__now.font-3');
