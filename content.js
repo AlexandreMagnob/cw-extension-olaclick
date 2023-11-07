@@ -19,7 +19,8 @@ class Scrapy {
   }
 
   async clickCategoryCards() {
-    let categoryCards = document.querySelectorAll('div.category-card');
+    let categoryGrid = document.querySelector('.category-grid')
+    let categoryCards = categoryGrid.querySelectorAll('div.category-card');
     for await (const categoryCardIndex of [...Array(categoryCards.length).keys()]) {
         await this.sleep(500)
         /*
@@ -27,7 +28,8 @@ class Scrapy {
             await new Promise(resolve => setTimeout(resolve, 100));
         }*/
 
-        let categoryCards = document.querySelectorAll('div.category-card');
+        let categoryGrid = document.querySelector('.category-grid')
+        let categoryCards = categoryGrid.querySelectorAll('div.category-card');
         let categoryCard = categoryCards[categoryCardIndex]
         console.log({categoryCards, categoryCard})
         await this.sleep(1000)
