@@ -20,7 +20,6 @@ class Scrapy {
         return "sem repeticao";
       }
     }
-
     async processTypeComplement(typeComplement, complementExpandable) {
       const complement = typeComplement !== "" ? typeComplement : "";
       let repetition = await this.checkRepetition(complementExpandable);
@@ -28,32 +27,6 @@ class Scrapy {
       let minQtd = 0;
       let maxQtd = 0;
     
-      if (complement.match(/^Escolha (\d+) itens/)) {
-        const itemCount = parseInt(complement.match(/^Escolha (\d+) itens/)[1], 10);
-        if (itemCount !== 1) {
-          type = 'Mais de uma opcao ' + repetition;
-          minQtd = itemCount;
-          maxQtd = itemCount;
-          console.log(minQtd,maxQtd)}
-
-        }else if(complement == "Escolha 1 item"){
-          type = "Apenas uma opção";
-          minQtd = 1;
-          maxQtd = 1;
-      }
-      else if (complement.startsWith("Escolha até ")) {
-        const maxItems = parseInt(complement.match(/\d+/)[0], 10);
-        type = 'Mais de uma opcao ' + repetition;
-        maxQtd = maxItems;
-
-      } else if (complement.match(/^Escolha de \d+ até \d+ itens$/)) {
-        const minMaxItems = complement.match(/\d+/g);
-        const minItems = parseInt(minMaxItems[0], 10);
-        const maxItems = parseInt(minMaxItems[1], 10);
-        type = 'Mais de uma opcao ' + repetition;
-        minQtd = minItems;
-        maxQtd = maxItems;
-      }
       console.log(type)
       return [type, minQtd, maxQtd];
     }
@@ -124,18 +97,26 @@ class Scrapy {
                   // Se a classe for 'radio', trata como um rádio.
                   let optionTitleElement = optionElement.querySelector('label');
                   let optionPriceElement = optionElement.querySelector('.pull-right');
-              
+                  
                   let optionTitle = optionTitleElement.textContent.trim();
                   let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
                   let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+
                 } else if (optionElement.classList.contains('pb') && optionElement.classList.contains('pt')) {
-                  // Se a classe contiver 'pb' e 'pt', trata como outra coisa.
-                  let priceElement = optionElement.querySelector('b');
-                  let priceText = priceElement ? priceElement.textContent : "";
-                  let price = priceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  let optionText = optionElement.textContent.trim();
+                  let regex = /(.+)\(([\d,.]+)\)/;
+                  let match = optionText.match(regex);
+                
+                  let optionTitle = match ? match[1].trim() : "";
+                  let optionPrice = match ? match[2].replace(',', '.') : "";
                 }
-                else if (optionElement.classList.contains('checkbox')){
-                  
+                else if (optionElement.classList.contains('checkbox')) {
+                  // Se a classe for 'checkbox', trata como um checkbox.
+                  let optionLabelElement = optionElement.querySelector('label');
+                  let optionLabelContent = optionLabelElement.textContent.trim();
+                  let optionTitle = optionLabelContent.split('+')[0].trim();
+                  let optionPriceText = optionLabelContent.split('+')[1].trim();
+                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
                 }
 
                 optionsComplement.push({
@@ -178,7 +159,8 @@ class Scrapy {
 
 async backPage() {
   await this.sleep(1000);
-  let back = document.querySelector('.navigation-header__back')
+  let productModal = document.querySelector('.modal-dialog');
+  let back = productModal.querySelector('fa.fa');
   if (back) {
     back.click()
 }}
