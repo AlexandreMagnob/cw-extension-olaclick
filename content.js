@@ -80,7 +80,7 @@ class Scrapy {
           maxQtd = itemCount;
           console.log(minQtd,maxQtd)}
       }else if(complement == "Escolha 1 item"){
-        type = "Apenas uma opção";
+        type = "Apenas uma opcao";
         minQtd = 1;
         maxQtd = 1;
       }
