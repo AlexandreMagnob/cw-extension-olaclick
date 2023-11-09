@@ -19,35 +19,36 @@ class Scrapy {
   }
 
   async clickCategoryCards() {
-    let categoryGrid = document.querySelector('.category-grid')
+    let categoryGrid = document.querySelector('.category-grid');
     let categoryCards = categoryGrid.querySelectorAll('div.category-card');
-    for await (const categoryCardIndex of [...Array(categoryCards.length).keys()]) {
-        await this.sleep(500)
-        /*
-        while (document.querySelectorAll('div.category-card').length <= categoryCardIndex) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }*/
 
-        let categoryGrid = document.querySelector('.category-grid')
+    for await (const categoryCardIndex of [...Array(categoryCards.length).keys()]) {
+        await this.sleep(500);
+
+        let categoryGrid = document.querySelector('.category-grid');
         let categoryCards = categoryGrid.querySelectorAll('div.category-card');
-        let categoryCard = categoryCards[categoryCardIndex]
-        console.log({categoryCards, categoryCard})
-        await this.sleep(1000)
+        let categoryCard = categoryCards[categoryCardIndex];
+
+        console.log({ categoryCards, categoryCard });
+        // Adicione um tempo de espera antes do clique para garantir que a página esteja pronta
+        await this.sleep(1000);
+        // Use o método scrollIntoView para garantir que o elemento esteja visível
+        categoryCard.scrollIntoView();
+        // Clique no elemento
         categoryCard.click();
-        await this.sleep(500)
+        console.log("clicou")
+        // Aguarde um tempo suficiente após o clique antes de chamar clickProductCards
+        await this.sleep(1000);
+        // Chame clickProductCards
         await this.clickProductCards();
-        /*
-        while (true) {
-            if (await this.clickProductCards()) {
-                break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }*/
-        await this.sleep(500)
-        await this.backPage()
-        
+        console.log("executou!")
+        // Aguarde antes de voltar à página anterior
+        await this.sleep(500);
+        // Volte à página anterior
+        await this.backPage();
     }
-  }
+}
+
 
     async checkRepetition(complementExpandable) {
       const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
@@ -95,7 +96,6 @@ class Scrapy {
         minQtd = minItems;
         maxQtd = maxItems;
       }
-      console.log(type)
       return [type, minQtd, maxQtd];
     }
     
@@ -109,10 +109,8 @@ class Scrapy {
       await this.sleep(500)
       let categoryDivs = document.querySelectorAll('.category-container');
       let categoryDiv = categoryDivs[categoryIndex];
-      console.log(categoryDivs.length)
       let categoryNameElement = categoryDiv.querySelector('span');
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-      console.log(categoryName)
       let productCards = categoryDiv.querySelectorAll(".category-container__products__product-list.col-md-6.col-12.not-small");
   
       let productData = [];
@@ -120,7 +118,6 @@ class Scrapy {
         await this.sleep(1000)
         let categoryDivs = document.querySelectorAll('.category-container');
         let categoryDiv = categoryDivs[categoryIndex];
-        console.log({categoryDivs,categoryDiv})
         let productCards = categoryDiv.querySelectorAll((".category-container__products__product-list.col-md-6.col-12.not-small"));
         let productCard = productCards[productIndex];
         
@@ -132,17 +129,16 @@ class Scrapy {
         let innerDiv = productCard.querySelector('.item-card-container.row.justify-between');
         if (innerDiv) {
           await this.sleep(500)
+          innerDiv.scrollIntoView();
           innerDiv.click();
           // Agora, vamos adicionar um atraso antes de coletar os dados.
           await this.sleep(1000)
           let productContainer = document.querySelector('.item-header-container')
           let titleElement = productContainer.querySelector('span.font-5');
-          console.log(titleElement)
           let priceElement = productContainer.querySelector('span.price__now.font-3');
           let imgElement = productContainer.querySelector('img');
           let descricaoElement = productContainer.querySelector('span.weight-400');
           let productTitle = titleElement ? titleElement.textContent : "";
-          console.log(productTitle)
           let priceText = priceElement ? priceElement.textContent : "";
           let productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
           let imgSrc = imgElement ? imgElement.src : "";
