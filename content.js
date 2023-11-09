@@ -6,7 +6,7 @@ class Scrapy {
 
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
-    async checkRepetition(complementExpandable) {
+    /*async checkRepetition(complementExpandable) {
       const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
       const plusButton = chooserDiv.querySelectorAll('button.btn.radius-1.font-10.no-user-select.btn-container')[1];      
       plusButton.click();
@@ -30,7 +30,7 @@ class Scrapy {
       console.log(type)
       return [type, minQtd, maxQtd];
     }
-    
+    */
 
   async clickProductCards() {
     console.log("executando..")
@@ -78,21 +78,21 @@ class Scrapy {
           let complementsDict = []
           let complementExpandables = productModal.querySelectorAll('.panel.panel-danger')
           for await (const complementExpandable of complementExpandables) {
-            let complementElements = complementExpandable.querySelector('.panel-heading')
+            let complementElements = complementExpandable.querySelectorAll('.panel-heading')
             let optionsComplement = [];
-  
             // Pegar o nome de cada complemento
             for await (const complementElement of complementElements) {
               let typeComplementElement = complementElement.querySelector('small');
               let complementNameElement = complementElement.querySelector('.panel-title');
               
               let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
-              let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
+              //let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
+              let typeComplement, minQtd, maxQtd, requiredElement = ""
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
               
               // Pegar nome de cada opção do complemento da iteração
-              let optionsElement = complementExpandabledocument.querySelectorAll('.checkbox,.radio,.pb.pt.clearfix');
+              let optionsElement = complementExpandable.querySelectorAll('.checkbox,.radio,.pb.pt.clearfix');
               for await (const optionElement of optionsElement) {
                 if (optionElement.classList.contains('radio')) {
                   // Se a classe for 'radio', trata como um rádio.
