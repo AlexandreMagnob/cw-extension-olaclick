@@ -90,6 +90,7 @@ class Scrapy {
               let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
               let required = requiredElement ? requiredElement.textContent : "";
               let complementName = complementNameElement ? complementNameElement.textContent : "";
+              
               // Pegar nome de cada opção do complemento da iteração
               let optionsElement = complementExpandabledocument.querySelectorAll('.checkbox,.radio,.pb.pt.clearfix');
               for await (const optionElement of optionsElement) {
@@ -113,10 +114,16 @@ class Scrapy {
                 else if (optionElement.classList.contains('checkbox')) {
                   // Se a classe for 'checkbox', trata como um checkbox.
                   let optionLabelElement = optionElement.querySelector('label');
-                  let optionLabelContent = optionLabelElement.textContent.trim();
-                  let optionTitle = optionLabelContent.split('+')[0].trim();
-                  let optionPriceText = optionLabelContent.split('+')[1].trim();
-                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  
+                  if (optionLabelElement) {
+                    let optionLabelContent = optionLabelElement.textContent.trim();
+                    let optionTitle = optionLabelContent.split('+')[0].trim();
+                    let optionPriceText = optionLabelContent.split('+')[1];
+                    let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  }
+                  else{
+                    let optionPrice = ""
+                  }
                 }
 
                 optionsComplement.push({
@@ -172,7 +179,7 @@ window.scrapy = new Scrapy();
 
 chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
   if (request.text === 'hi') {
-      await window.scrapy.checkAndScrape();
+      await window.scrapy.clickProductCards();
       const scrapedData = window.scrapy.scrapedData
       const titleRestaurant = window.scrapy.titleRestaurant
       await createCSV(scrapedData, titleRestaurant)

@@ -19,7 +19,7 @@
     },
     "content_scripts": [
       {
-        "matches": ["https://pedido.anota.ai/*"],
+        "matches": ["https://pedido.anota.ai/*, "],
         "js": ["papaparse.min.js", "content.js", "sheet_generation.js"],
         "all_frames": true
       }
