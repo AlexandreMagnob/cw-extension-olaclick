@@ -1,3 +1,4 @@
+
 class Scrapy {
   constructor() {
     this.scrapedData = [];
@@ -7,45 +8,64 @@ class Scrapy {
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
     async processTypeComplement(complementExpandable) {
-      let typeOption = complementExpandable.querySelector('.checkbox,.radio,.pb.pt');
-      if (typeOption.classList.contains('radio')) {
+      await this.sleep(300)
+      let typeOption = complementExpandable.querySelector('.checkbox, .radio, .pb.pt');
 
-        type = "Apenas uma opcao"
-        minQtd = 0
-        maxQtd = 1
-        return [type, minQtd, maxQtd]
+      if (typeOption && typeOption.classList) {
+        if (typeOption.classList.contains('radio')) {
+          type = "Apenas uma opcao";
+          minQtd = 0;
+          maxQtd = 1;
+          return [type, minQtd, maxQtd];
+        } else if (typeOption.classList.contains('pb') && typeOption.classList.contains('pt')) {
+          let buttonGroup = complementExpandable.querySelector('.input-group');
+          let buttonPlus = buttonGroup.querySelector('.btn.btn-default.btn-plus');
+          let minQtd = buttonGroup.querySelector('.form-control.text-center').value;
+          let maxQtd = "";
 
-      } else if (typeOption.classList.contains('pb') && typeOption.classList.contains('pt')) {
+          buttonPlus.click();
+          buttonPlus.click();
+          await this.sleep(200);
 
-        let buttonGroup = complementExpandable.querySelector('.input-group')
-        let buttonPlus = buttonGroup.querySelector('.btn.btn-default.btn-plus')
-        let minQtd = buttonGroup.querySelector('.form-control.text-center').value
-        let maxQtd = ""
-        
-        buttonPlus.click()
-        buttonPlus.click()
-        await this.sleep(200)
-        let repetion = ""
-        let counter = buttonGroup.querySelector('.form-control.text-center')
-        let counterValue = parseInt(counter.value, 10); 
-        if (counterValue > 1) {
-          repetion = " com repeticao";
-        } else {
-          repetion = " sem repeticao";
+          let repetion = "";
+          let counter = buttonGroup.querySelector('.form-control.text-center');
+          let counterValue = parseInt(counter.value, 10);
+
+          if (counterValue > 1) {
+            repetion = " com repeticao";
+          } else {
+            repetion = " sem repeticao";
+          }
+
+          let type = "Mais de uma opcao" + repetion;
+          return [type, minQtd, maxQtd];
+        } else if (typeOption.classList.contains('checkbox')) {
+          let minQtd = "0";
+          let maxQtd = "";
+          let type = "Mais de uma opcao com repeticao";
+          return [type, minQtd, maxQtd];
         }
-        let type = "Mais de uma opcao" + repetion
-        return [type, minQtd, maxQtd];
+      }
+      else {
+        return ["", "", ""]
       }
 
-      else if (typeOption.classList.contains('checkbox')) {
-        let minQtd = "0"
-        let maxQtd = ""
-        let type = "Mais de uma opcao com repeticao"
-        return [type, minQtd, maxQtd];
-      }
-      
     }
 
+  async expandCategory(categoryDiv){
+    let productCardsContainer = categoryDiv.querySelector('.panel-collapse');
+    let isProductsVisible = productCardsContainer.scrollHeight > 0;
+
+    if (!isProductsVisible) {
+      // Se os produtos não estão visíveis, clique no botão para expandir
+      let expandButton = categoryDiv.querySelector('.fa-chevron-up'); // Substitua '.fa-chevron-up' pelo seletor real do botão
+      if (expandButton) {
+        expandButton.scrollIntoView();
+        expandButton.click();
+        await this.sleep(1000); // Aguarde tempo suficiente para que os produtos sejam carregados após a expansão
+      }
+    }
+  }
 
 
   async clickProductCards() {
@@ -60,8 +80,11 @@ class Scrapy {
       let categoryNameElement = categoryDiv.querySelector('.truncate-overflow')
       let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
   
+      //Expande a categoria de produtos
+      await this.expandCategory(categoryDiv)
+
       let productCards = categoryDiv.querySelectorAll('.product-container');
-  
+
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
         await this.sleep(500)
@@ -103,12 +126,16 @@ class Scrapy {
               
               let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
               let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(complementExpandable);
-              let required = requiredElement ? requiredElement.textContent : "";
+              console.log([typeComplement, minQtd, maxQtd])
               let complementName = complementNameElement ? complementNameElement.textContent : "";
               
               // Pegar nome de cada opção do complemento da iteração
               let optionsElement = complementExpandable.querySelectorAll('.checkbox,.radio,.pb.pt');
               for await (const optionElement of optionsElement) {
+                let optionTitle = "";
+                let optionPrice = "0";
+                let optionDescription = "";
+
                 if (optionElement.classList.contains('radio')) {
                   // Se a classe for 'radio', trata como um rádio.
                   let optionTitleElement = optionElement.querySelector('label');
@@ -136,9 +163,6 @@ class Scrapy {
                     let optionPriceText = optionLabelContent.split('+')[1];
                     let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
                   }
-                  else{
-                    let optionPrice = ""
-                  }
                 }
 
                 optionsComplement.push({
@@ -153,7 +177,6 @@ class Scrapy {
                 typeComplement: typeComplement,
                 minQtd: minQtd,
                 maxQtd: maxQtd,
-                required: required,
                 options: optionsComplement
               })
             }
