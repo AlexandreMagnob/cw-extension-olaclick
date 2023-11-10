@@ -6,7 +6,8 @@ class Scrapy {
 
   sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
 
-    async processTypeComplement(typeOption, complementExpandable) {
+    async processTypeComplement(complementExpandable) {
+      let typeOption = complementExpandable.querySelector('.checkbox,.radio,.pb.pt');
       if (typeOption.classList.contains('radio')) {
 
         type = "Apenas uma opcao"
@@ -41,7 +42,6 @@ class Scrapy {
         let maxQtd = ""
         let type = "Mais de uma opcao com repeticao"
         return [type, minQtd, maxQtd];
-
       }
       
     }
@@ -107,7 +107,7 @@ class Scrapy {
               let complementName = complementNameElement ? complementNameElement.textContent : "";
               
               // Pegar nome de cada opção do complemento da iteração
-              let optionsElement = complementExpandable.querySelectorAll('.checkbox,.radio,.pb.pt.clearfix');
+              let optionsElement = complementExpandable.querySelectorAll('.checkbox,.radio,.pb.pt');
               for await (const optionElement of optionsElement) {
                 if (optionElement.classList.contains('radio')) {
                   // Se a classe for 'radio', trata como um rádio.
