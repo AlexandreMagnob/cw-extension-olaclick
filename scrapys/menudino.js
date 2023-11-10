@@ -1,5 +1,5 @@
 
-class Scrapy {
+class ScrapyDino {
   constructor() {
     this.scrapedData = [];
     this.titleRestaurant = ""
@@ -213,16 +213,3 @@ async backPage() {
     back.click()
 }}
 }
-
-
-// Exporta a instância da classe Scrapy para uso em popup.js
-window.scrapy = new Scrapy();
-
-chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
-  if (request.text === 'hi') {
-      await window.scrapy.clickProductCards();
-      const scrapedData = window.scrapy.scrapedData
-      const titleRestaurant = window.scrapy.titleRestaurant
-      await createCSV(scrapedData, titleRestaurant)
-  }
-});
