@@ -52,20 +52,23 @@ class Scrapy {
 
     }
 
-  async expandCategory(categoryDiv){
-    let productCardsContainer = categoryDiv.querySelector('.panel-collapse');
-    let isProductsVisible = productCardsContainer.scrollHeight > 0;
-
-    if (!isProductsVisible) {
-      // Se os produtos não estão visíveis, clique no botão para expandir
-      let expandButton = categoryDiv.querySelector('.fa-chevron-up'); // Substitua '.fa-chevron-up' pelo seletor real do botão
-      if (expandButton) {
-        expandButton.scrollIntoView();
-        expandButton.click();
-        await this.sleep(1000); // Aguarde tempo suficiente para que os produtos sejam carregados após a expansão
+    async expandCategory(categoryDiv) {
+      // Verifique se os produtos estão expandidos
+      let productCardsContainer = categoryDiv.querySelector('.panel-collapse');
+      if (productCardsContainer) {
+        let isProductsVisible = productCardsContainer.scrollHeight > 0;
+    
+        if (!isProductsVisible) {
+          // Se os produtos não estão visíveis, clique no botão para expandir
+          let expandButton = categoryDiv.querySelector('.fa-chevron-up'); // Substitua '.fa-chevron-up' pelo seletor real do botão
+          if (expandButton) {
+            expandButton.scrollIntoView();
+            expandButton.click();
+            await this.sleep(1000); // Aguarde tempo suficiente para que os produtos sejam carregados após a expansão
+          }
+        }
       }
     }
-  }
 
 
   async clickProductCards() {
