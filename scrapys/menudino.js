@@ -10,6 +10,9 @@ class ScrapyDino {
     async processTypeComplement(complementExpandable) {
       await this.sleep(300)
       let typeOption = complementExpandable.querySelector('.checkbox, .radio, .pb.pt');
+      let type = "";
+      let minQtd = 0
+      let maxQtd = ""
 
       if (typeOption && typeOption.classList) {
         if (typeOption.classList.contains('radio')) {
@@ -20,8 +23,8 @@ class ScrapyDino {
         } else if (typeOption.classList.contains('pb') && typeOption.classList.contains('pt')) {
           let buttonGroup = complementExpandable.querySelector('.input-group');
           let buttonPlus = buttonGroup.querySelector('.btn.btn-default.btn-plus');
-          let minQtd = buttonGroup.querySelector('.form-control.text-center').value;
-          let maxQtd = "";
+          minQtd = buttonGroup.querySelector('.form-control.text-center').value;
+          maxQtd = "";
 
           buttonPlus.click();
           buttonPlus.click();
@@ -37,12 +40,12 @@ class ScrapyDino {
             repetion = " sem repeticao";
           }
 
-          let type = "Mais de uma opcao" + repetion;
+          type = "Mais de uma opcao" + repetion;
           return [type, minQtd, maxQtd];
         } else if (typeOption.classList.contains('checkbox')) {
-          let minQtd = "0";
-          let maxQtd = "";
-          let type = "Mais de uma opcao com repeticao";
+          minQtd = "0";
+          maxQtd = "";
+          type = "Mais de uma opcao com repeticao";
           return [type, minQtd, maxQtd];
         }
       }
