@@ -91,6 +91,9 @@ class ScrapyDino {
 
       let productCards = categoryDiv.querySelectorAll('.product-container');
 
+      console.log(categoryName)
+      console.log(productCards.length)
+
       let productData = [];
       for await (const productIndex of [...Array(productCards.length).keys()]) {
         await this.sleep(500)
@@ -98,7 +101,9 @@ class ScrapyDino {
         let categoryDiv = categoryDivs[categoryIndex];
         let productCards = categoryDiv.querySelectorAll('.product-container');
         let productCard = productCards[productIndex];
-  
+        
+        console.log({productIndex, productCard})
+
         let priceElement = productCard.querySelector('.price');
   
         let innerDiv = productCard.querySelector('.product-item');
@@ -127,14 +132,19 @@ class ScrapyDino {
             let optionsComplement = [];
             // Pegar o nome de cada complemento
             for await (const complementElement of complementElements) {
-              let typeComplementElement = complementElement.querySelector('small');
+              //let typeComplementElement = complementElement.querySelector('small');
               let complementNameElement = complementElement.querySelector('.panel-title');
               
-              let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
               let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(complementExpandable);
               console.log([typeComplement, minQtd, maxQtd])
               let complementName = complementNameElement ? complementNameElement.textContent : "";
               
+              // Adiciona verificação para pular "Alguma observação?"
+              if (complementName.trim() === "Alguma observação?") {
+                console.log("Observação pulada..")
+                continue; // Pula para a próxima iteração do loop
+            }
+
               // Pegar nome de cada opção do complemento da iteração
               let optionsElement = complementExpandable.querySelectorAll('.checkbox,.radio,.pb.pt');
               for await (const optionElement of optionsElement) {
@@ -147,17 +157,22 @@ class ScrapyDino {
                   let optionTitleElement = optionElement.querySelector('label');
                   let optionPriceElement = optionElement.querySelector('.pull-right');
                   
-                  let optionTitle = optionTitleElement.textContent.trim();
+                  optionTitle = optionTitleElement.textContent.trim();
                   let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
 
+                  
+                  console.log({optionPrice, optionTitle})
+                  
                 } else if (optionElement.classList.contains('pb') && optionElement.classList.contains('pt')) {
                   let optionText = optionElement.textContent.trim();
                   let regex = /(.+)\(([\d,.]+)\)/;
                   let match = optionText.match(regex);
                 
-                  let optionTitle = match ? match[1].trim() : "";
-                  let optionPrice = match ? match[2].replace(',', '.') : "";
+                  optionTitle = match ? match[1].trim() : "";
+                  optionPrice = match ? match[2].replace(',', '.') : "";
+                  
+                  console.log({optionPrice, optionTitle})
                 }
                 else if (optionElement.classList.contains('checkbox')) {
                   // Se a classe for 'checkbox', trata como um checkbox.
@@ -165,9 +180,11 @@ class ScrapyDino {
                   
                   if (optionLabelElement) {
                     let optionLabelContent = optionLabelElement.textContent.trim();
-                    let optionTitle = optionLabelContent.split('+')[0].trim();
+                    optionTitle = optionLabelContent.split('+')[0].trim();
                     let optionPriceText = optionLabelContent.split('+')[1];
-                    let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                    optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+
+                    console.log({optionPrice, optionTitle})
                   }
                 }
 
@@ -195,6 +212,7 @@ class ScrapyDino {
             descricao: productDescricao,
             complementsDict: complementsDict
           });
+          console.log("Produto adicionado")
           await this.backPage();
         }
       }
@@ -202,17 +220,19 @@ class ScrapyDino {
         categoryName: categoryName,
         productsCategory: productData
       });
+      console.log("Categoria adicionada")
       await this.backPage();
     }
-    alert("Finalizado!")
 }
 
 
 async backPage() {
+  console.log("Voltou!")
   await this.sleep(1000);
-  let productModal = document.querySelector('.modal-dialog');
-  let back = productModal.querySelector('fa.fa');
+  let back = document.querySelector('.modal-dialog .fa-chevron-left');
   if (back) {
     back.click()
-}}
+}
+  await this.sleep(1000);
+}
 }

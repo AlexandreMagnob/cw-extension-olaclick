@@ -43,7 +43,7 @@ class ScrapyAnotai {
           await this.clickProductCards();
           console.log("executou!")
           // Aguarde antes de voltar à página anterior
-          await this.sleep(500);
+          await this.sleep(1000);
           // Volte à página anterior
           await this.backPage();
       }

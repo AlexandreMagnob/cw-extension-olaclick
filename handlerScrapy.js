@@ -9,8 +9,17 @@ class HandlerScrapy {
       // Decide qual scraper usar com base no restaurante escolhido pelo usuário
       if (restaurante === 'Dino') {
         await this.scrapyDino.clickProductCards();
+        const scrapedData = this.scrapyDino.scrapedData
+        alert("Finalizado")
+        const titleRestaurant = this.scrapyDino.titleRestaurant
+        await createCSV(scrapedData, titleRestaurant)
+
       } else if (restaurante === 'Anotai') {
-        await this.scrapyAnotai.clickProductCards();
+        await this.scrapyAnotai.checkAndScrape();
+        const scrapedData = this.scrapyAnotai.scrapedData
+        alert("Finalizado")
+        const titleRestaurant = this.scrapyAnotai.titleRestaurant
+        await createCSV(scrapedData, titleRestaurant)
       } else {
         console.error('Restaurante inválido');
       }
