@@ -101,12 +101,11 @@ class OlaClick {
             productCard.click();
             // Agora, vamos adicionar um atraso antes de coletar os dados.
             await this.sleep(1000)
-            let productModal = document.querySelector('.rounded-tr-lg')
+            let productModal = document.querySelector('.rounded-t-lg.rounded-b-0');
             let titleElement = productModal.querySelector('.font-weight-bold');
-            let priceElement = productModal.querySelector('.font-weight-medium mr-3');
-            let imgElement = productModal.querySelector('.v-toolbar__image');
-            let descricaoElement = productModal.querySelector('.description.mb-0.text-truncate-4-line');
-            //parei aq
+            let priceElement = productModal.querySelector('.font-weight-bold.mr-2');
+            let imgElement = productModal.querySelector('.v-image__image').style.backgroundImage.replace(/^url\(['"](.+)['"]\)/, '$1');
+            let descricaoElement = productModal.querySelector('.description.mb-0');
             let productTitle = titleElement ? titleElement.textContent : "";
             let priceText = priceElement ? priceElement.textContent : "";
             let productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
@@ -114,11 +113,11 @@ class OlaClick {
             let productDescricao = descricaoElement ? descricaoElement.textContent : "";
     
             let complementsDict = []
-            let complementExpandables = document.querySelectorAll('div.expandable');
+            let complementExpandables = document.querySelectorAll('div.v-expansion-panel');
             for await (const complementExpandable of complementExpandables) {
-              let complementElements = complementExpandable.querySelectorAll('div.expandable__fixed.py-2.px-4.pointer.bg-grey-12');
+              let complementElements = complementExpandable.querySelectorAll('.v-expansion-panel-header.product-expansion-panel__header');
               let optionsComplement = [];
-    
+              //parei na parte em que eu pego os completemtntos
               // Pegar o nome de cada complemento
               for await (const complementElement of complementElements) {
                 let typeComplementElement = complementElement.querySelector('span.expandable__fixed__header__text__subtitle.font-1.text-grey');
