@@ -21,12 +21,14 @@
     {
       "matches": [
         "https://*.anota.ai/*",
-        "https://*.menudino.com/*"
+        "https://*.menudino.com/*",
+        "https://*.ola.click/*"
       ],
       "js": [
         "papaparse.min.js",
         "scrapys/anotai.js",  
         "scrapys/menudino.js",
+        "scrapys/ola-click.js",
         "handlerScrapy.js",
         "sheet_generation.js"
       ],
