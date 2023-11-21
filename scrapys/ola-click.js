@@ -197,8 +197,6 @@ class ScrapyOlaClick {
                 let complementNameElement = complementElement.querySelector('div.product-expansion-header__category-title');
                 
                 let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
-                console.log("TIPO COMPLEMENTO:",  typeComplementText)
-                console.log("ELEMENTO COMPLEMENTO:",  complementElement)
                 let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText.trim(), complementElement);
 
                 let required = requiredElement ? requiredElement.textContent : "";
@@ -214,7 +212,7 @@ class ScrapyOlaClick {
                 let optionDescription = "";
 
                 for await (const optionElement of optionsElement) {
-
+ 
                 if (optionElement.classList.contains('v-radio')) {
                   // Se a classe for 'radio', trata como um rádio.
                   let optionTitleElement = optionElement.querySelector('.product-price-radio__label');
@@ -233,7 +231,6 @@ class ScrapyOlaClick {
                   if (optionDivElement) {
 
                     let optionText = optionDivElement.textContent;
-                    console.log(optionText);
                     let optionParts = optionText.split(/\s*\+\s*/);
                     optionTitle = optionParts[0].trim();
                     optionPrice = optionParts[1] ? optionParts[1].trim().replace(/[^\d,.]/g, '').replace(',', '.') : "0";
