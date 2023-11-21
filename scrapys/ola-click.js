@@ -207,7 +207,7 @@ class ScrapyOlaClick {
                 
                 // Pegar nome de cada opção do complemento da iteração
 
-                let optionsElement = complementExpandable.querySelectorAll('.v-radio, .v-input,.topping-incrementable__btn');
+                let optionsElement = complementExpandable.querySelectorAll('.v-radio, .v-input,.topping-incrementable');
                 
                 let optionTitle = "";
                 let optionPrice = "0";
@@ -247,7 +247,7 @@ class ScrapyOlaClick {
 
                     
                   
-                }else if (optionElement.classList.contains('topping-incrementable__btn')) {
+                }else if (optionElement.classList.contains('topping-incrementable')) {
                   let optionTitleElement = optionElement.querySelector('.topping-incrementable__label');
                   let optionPriceElement = optionElement.querySelector('.topping-incrementable__price');
                   
