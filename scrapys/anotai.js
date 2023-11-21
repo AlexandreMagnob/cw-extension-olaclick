@@ -50,54 +50,74 @@ class ScrapyAnotai {
   }
   
   
-      async checkRepetition(complementExpandable) {
-        const chooserDiv = complementExpandable.querySelector('.chooser-select.w-20');
-        const plusButton = chooserDiv.querySelectorAll('button.btn.radius-1.font-10.no-user-select.btn-container')[1];      
-        plusButton.click();
-        plusButton.click();
-        await this.sleep(200)
-        const counter = chooserDiv.querySelector('.px-2.font-3.row-center');
-        const counterValue = parseInt(counter.textContent, 10);
-        if (counterValue > 1) {
-          return "com repeticao";
-        } else {
-          return "sem repeticao";
+  async checkRepetition(complementExpandable) {
+    let button = complementExpandable.querySelector('.topping-incrementable__btn');
+    if (button) {
+        return { repetition: "com repeticao" };
+    } else {
+        return { repetition: "sem repeticao" };
+    }
+}
+
+        async processTypeComplement(typeComplement, complementExpandable) {
+            console.log('typeComplement:', typeComplement);
+            const complement = typeComplement.trim();
+            let { repetition } = checkRepetition(complementExpandable);
+            console.log('repetition:', repetition);
+            let type = "";
+            let minQtd = 0;
+            let maxQtd = 0;
+
+            const matchSelect = complement.match(/^Selecione (\d+) opções/);
+            const matchSelectMin = complement.match(/^Selecione o mínimo (\d+) opção/);
+            const matchSelectUntil = complement.match(/^Selecione até (\d+) opções/);
+            const matchChooseFromTo = complement.match(/^Escolha de (\d+) até (\d+) opções$/);
+
+            if (matchSelect) {
+                const itemCount = parseInt(matchSelect[1], 10);
+                if (itemCount !== 1) {
+                    type = "Mais de uma opção " + repetition;
+                    minQtd = itemCount;
+                    maxQtd = itemCount;
+                    console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+                }
+            } else if (complement === "Selecione 1 opção") {
+                type = "Apenas uma opção ";
+                minQtd = 1;
+                maxQtd = 1;
+            } else if (matchSelectUntil) {
+            const maxItems = parseInt(matchSelectUntil[1], 10);
+            if (maxItems === 1) {
+                type = "Apenas uma opção " + repetition;
+                minQtd = 0;
+                maxQtd = maxItems;
+                console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            } else {
+                type = "Mais de um opção " + repetition;
+                minQtd = 0;
+                maxQtd = maxItems;
+                console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            }
+        } else if (matchChooseFromTo) {
+                const minItems = parseInt(matchChooseFromTo[1], 10);
+                const maxItems = parseInt(matchChooseFromTo[2], 10);
+                type = "Mais de uma opção " + repetition;
+                minQtd = minItems;
+                maxQtd = maxItems;
+                console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            } else if (matchSelectMin) {
+                const minItems = parseInt(matchSelectMin[1], 10);
+                const maxItems = parseInt(matchSelectMin[1], 10);
+                type = "Apenas uma opção " + repetition;
+                minQtd = minItems;
+                maxQtd = maxItems
+                console.log('minQtd:', minQtd, 'maxqtd', maxQtd);
+            }
+
+           
+            return [type, minQtd, maxQtd];
         }
-      }
-  
-      async processTypeComplement(typeComplement, complementExpandable) {
-        const complement = typeComplement !== "" ? typeComplement : "";
-        let repetition = await this.checkRepetition(complementExpandable);
-        let type = "";
-        let minQtd = 0;
-        let maxQtd = 0;
-      
-        if (complement.match(/^Escolha (\d+) itens/)) {
-          const itemCount = parseInt(complement.match(/^Escolha (\d+) itens/)[1], 10);
-          if (itemCount !== 1) {
-            type = 'Mais de uma opcao ' + repetition;
-            minQtd = itemCount;
-            maxQtd = itemCount;
-            console.log(minQtd,maxQtd)}
-        }else if(complement == "Escolha 1 item"){
-          type = "Apenas uma opcao";
-          minQtd = 1;
-          maxQtd = 1;
-        }
-        else if (complement.startsWith("Escolha até ")) {
-          const maxItems = parseInt(complement.match(/\d+/)[0], 10);
-          type = 'Mais de uma opcao ' + repetition;
-          maxQtd = maxItems;
-        } else if (complement.match(/^Escolha de \d+ até \d+ itens$/)) {
-          const minMaxItems = complement.match(/\d+/g);
-          const minItems = parseInt(minMaxItems[0], 10);
-          const maxItems = parseInt(minMaxItems[1], 10);
-          type = 'Mais de uma opcao ' + repetition;
-          minQtd = minItems;
-          maxQtd = maxItems;
-        }
-        return [type, minQtd, maxQtd];
-      }
+
       
   
     async clickProductCards() {
@@ -136,6 +156,7 @@ class ScrapyAnotai {
             let productContainer = document.querySelector('.item-header-container')
             let titleElement = productContainer.querySelector('span.font-5');
             let priceElement = productContainer.querySelector('span.price__now.font-3');
+            console.log(priceElement)
             let imgElement = productContainer.querySelector('img');
             let descricaoElement = productContainer.querySelector('span.weight-400');
             let productTitle = titleElement ? titleElement.textContent : "";
@@ -145,6 +166,7 @@ class ScrapyAnotai {
             let productDescricao = descricaoElement ? descricaoElement.textContent : "";
     
             let complementsDict = []
+            
             let complementExpandables = document.querySelectorAll('div.expandable');
             for await (const complementExpandable of complementExpandables) {
               let complementElements = complementExpandable.querySelectorAll('div.expandable__fixed.py-2.px-4.pointer.bg-grey-12');
@@ -158,6 +180,7 @@ class ScrapyAnotai {
                 
                 let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
                 let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
+                  
                 let required = requiredElement ? requiredElement.textContent : "";
                 let complementName = complementNameElement ? complementNameElement.textContent : "";
                 // Pegar nome de cada opção do complemento da iteração

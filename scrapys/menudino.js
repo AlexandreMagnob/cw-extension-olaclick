@@ -118,6 +118,7 @@ class ScrapyDino {
           console.log(titleElement)
           let imgElement = productModal.querySelector('#produtoModalImagePath');
           let descricaoElement = productModal.querySelector('#produtoModalDescricao')
+          console.log("Descrição", descricaoElement)
           let productTitle = titleElement ? titleElement.textContent : "";
           console.log(productTitle)
           let priceText = priceElement ? priceElement.textContent : "";

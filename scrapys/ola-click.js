@@ -1,169 +1,288 @@
 class ScrapyOlaClick {
-    constructor() {
+  constructor() {
       this.scrapedData = [];
-      this.titleRestaurant = ""
-    }
-  
-    sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
-  
+      this.titleRestaurant = "";
+  }
 
-  
-  
-  
-  
-    async  checkRepetition(complementExpandable) {
-      let button = complementExpandable.querySelector('.topping-incrementable__btn');
-      if (button) {
-        return "com repeticao";
-      } else {
-        return "sem repeticao";
-      }
-    }
-  async  processTypeComplement(typeComplement, complementExpandable) {
-      const complement = typeComplement !== "" ? typeComplement : "";
-      let repetition = await this.checkRepetition(complementExpandable);
-      let type = "";
-      let minQtd = 0;
-      let maxQtd = 0;
+  sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-      if (complement.match(/^Selecione (\d+) opções/)) {
-        const itemCount = parseInt(complement.match(/^Selecione (\d+) opções/)[1], 10);
-        if (itemCount !== 1) {
-          type = 'Mais de uma opcao ' + repetition;
-          minQtd = itemCount;
-          maxQtd = itemCount;
-          console.log(minQtd,maxQtd)}
-      }else if(complement == "Selecione 1 opção"){
-        type = "Apenas uma opcao";
-        minQtd = 1;
-        maxQtd = 1;
-      }
-      else if (complement.startsWith("Selecione até " )) {
-        const maxItems = parseInt(complement.match(/\d+/)[0], 10);
-        type = 'Apenas uma opção ' + repetition;
-        minQtd = 0
-        maxQtd = maxItems;
-      } else if (complement.match(/^Escolha de \d+ até \d+ opções$/)) {
-        const minMaxItems = complement.match(/\d+/g);
-        const minItems = parseInt(minMaxItems[0], 10);
-        const maxItems = parseInt(minMaxItems[1], 10);
-        type = 'Mais de uma opcao ' + repetition;
-        minQtd = minItems;
-        maxQtd = maxItems;
-      }else if (complement.startsWith("Selecione o mínimo " )) {
-        const minItems = parseInt(complement.match(/\d+/)[0], 10);
-        type = 'Mais de uma opcao ' + repetition;
-        minQtd = minItems
-      } 
-      return [type, minQtd, maxQtd];
+    async checkRepetition(complementExpandable) {
+    let button = complementExpandable.querySelector('.topping-incrementable__btn');
+    let plusButton = complementExpandable.querySelector(".incrementable-buttons__btn.v-btn.v-btn--text.theme--light.v-size--default[style*='--primary-color']")
+    if (button || plusButton) {
+        return { repetition: "com repeticao" };
+    } else {
+        return { repetition: "sem repeticao" };
     }
-      
-    
-    async clickProductCards() {
+}
+
+        async processTypeComplement(typeComplement, complementExpandable) {
+          console.log("ENTROU 1111")
+            console.log('typeComplement:', typeComplement);
+            let productModal = document.querySelector('.v-dialog.v-dialog--active.v-dialog--scrollable');
+            const complement = typeComplement.trim();
+           let repetition = ""; // Declare a variável aqui com um valor padrão
+
+            if (!complementExpandable) {
+                ({ repetition } = await this.checkRepetition(productModal));
+                console.log("ENTROU 2222")
+            } else {
+                ({ repetition } = await this.checkRepetition(complementExpandable));
+                console.log("ENTROU 3333")
+            }
+            console.log('repetition:', repetition);
+            let type = "";
+            let minQtd = 0;
+            let maxQtd = 0;
+
+
+            if (!typeComplement && !complementExpandable) {
+              type = "Apenas uma opção " + repetition;
+              minQtd = 1;
+              maxQtd = "";
+              console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+          } else{
+            const matchSelect = complement.match(/^Selecione (\d+) opções/);
+            const matchSelectMin = complement.match(/^Selecione o mínimo (\d+) opção/);
+            const matchSelectUntil = complement.match(/^Selecione até (\d+) opções/);
+            const matchChooseFromTo = complement.match(/^Escolha de (\d+) até (\d+) opções$/);
+
+            if (matchSelect) {
+                const itemCount = parseInt(matchSelect[1], 10);
+                if (itemCount !== 1) {
+                    type = "Mais de uma opção " + repetition;
+                    minQtd = itemCount;
+                    maxQtd = itemCount;
+                    console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+                }
+            } else if (complement === "Selecione 1 opção") {
+                type = "Apenas uma opção ";
+                minQtd = 1;
+                maxQtd = 1;
+            } else if (matchSelectUntil) {
+            const maxItems = parseInt(matchSelectUntil[1], 10);
+            if (maxItems === 1) {
+                type = "Apenas uma opção " + repetition;
+                minQtd = 0;
+                maxQtd = maxItems;
+                console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            } else {
+                type = "Mais de um opção " + repetition;
+                minQtd = 0;
+                maxQtd = maxItems;
+                console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            }
+        } else if (matchChooseFromTo) {
+                const minItems = parseInt(matchChooseFromTo[1], 10);
+                const maxItems = parseInt(matchChooseFromTo[2], 10);
+                type = "Mais de uma opção " + repetition;
+                minQtd = minItems;
+                maxQtd = maxItems;
+                console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            } else if (matchSelectMin) {
+                const minItems = parseInt(matchSelectMin[1], 10);
+                const maxItems = parseInt(matchSelectMin[1], 10);
+                type = "Apenas uma opção " + repetition;
+                minQtd = minItems;
+                maxQtd = maxItems
+                console.log('minQtd:', minQtd, 'maxqtd', maxQtd);
+            }
+
+          }
+            return [type, minQtd, maxQtd];
+        
+      }
+
+  async scrollSmoothly(targetY, duration) {
+    const startingY = window.scrollY || document.documentElement.scrollTop;
+    const difference = targetY - startingY;
+    const startTime = new Date().getTime();
+
+    function easeInOutQuad(time, start, change, duration) {
+        time /= duration / 2;
+        if (time < 1) return change / 2 * time * time + start;
+        time--;
+        return -change / 2 * (time * (time - 2) - 1) + start;
+  }
+  return new Promise((resolve) => {
+    function animateScroll() {
+        const currentTime = new Date().getTime();
+        const elapsed = currentTime - startTime;
+
+        window.scrollTo(0, easeInOutQuad(elapsed, startingY, difference, duration));
+
+        if (elapsed < duration) {
+            requestAnimationFrame(animateScroll);
+        } else {
+            resolve();
+        }
+    }
+
+    animateScroll();
+});
+}
+
+  async scrollToEndAndBack() {
+      // Role suavemente até o final da página
+      await this.scrollSmoothly(document.body.scrollHeight, 2000); // 2000 ms (2 segundos)
+
+      await this.sleep(1000); // Aguarde um segundo
+
+      // Role suavemente de volta para o topo
+      await this.scrollSmoothly(0, 2000); // 2000 ms (2 segundos)
+
+      await this.sleep(1000); // Aguarde um segundo
+  }
+
+  async clickProductCards() {
       console.log("executando..")
-      await this.sleep(1000)
-      let categoryDivs = document.querySelectorAll('[data-v-294cdcdc]');
+      await this.sleep(1000);
+      await this.scrollToEndAndBack();
+      let categoryDivs = document.querySelectorAll('[data-v-294cdcdc=""][data-v-040becfc=""] > [data-v-294cdcdc=""]');
 
-      for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
-        await this.sleep(500)
-        let categoryDivs = document.querySelectorAll('[data-v-294cdcdc]');
+    for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
+        let categoryDivs = document.querySelectorAll('[data-v-294cdcdc=""][data-v-040becfc=""] > [data-v-294cdcdc=""]');
         let categoryDiv = categoryDivs[categoryIndex];
-        let h2Element =  categoryDiv.querySelector('h2.category.text-truncate-1-line');
+        let h2Element = categoryDiv.querySelector('h2.category.text-truncate-1-line');
 
-          if (h2Element && h2Element.textContent.trim() !== "Procurar Resultados") {
+        if (h2Element && h2Element.textContent.trim() !== "Procurar Resultados") {
             let title = h2Element.textContent.trim();
+            console.log("                                  ")
+            console.log("- - - - - - - - - - - - - - - - - ")
             console.log('Título:', title);
+            console.log("- - - - - - - - - - - - - - - - - ")
+            console.log("                                  ")
             let categoryNameElement = categoryDiv.querySelector('h2.category.text-truncate-1-line');
             let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-            let productCards = categoryDiv.querySelectorAll('.product-card__body.d-flex.flex-column.justify-space-between');
 
-          
-        let productData = [];
+            // Obtendo todos os cartões de produtos diretamente da categoria
+            let productCards = categoryDiv.querySelectorAll('.product-card');
+            console.log(productCards);
         
-        for await (const productIndex of [...Array(productCards.length).keys()]) {
-          await this.sleep(1000)
-          let categoryDivs = document.querySelectorAll('[data-v-294cdcdc]');
-          let categoryDiv = categoryDivs[categoryIndex];
-          let productCards = categoryDiv.querySelectorAll(".product-card__body.d-flex.flex-column.justify-space-between");
-          let productCard = productCards[productIndex];
-          
-  
-            await this.sleep(500)
-            productCard.click();
-            // Agora, vamos adicionar um atraso antes de coletar os dados.
-            await this.sleep(1000)
-            let productModal = document.querySelector('.rounded-t-lg.rounded-b-0');
+              let productData = [];
+
+              for await (const productIndex of [...Array(productCards.length).keys()]) {
+                  await this.sleep(1000);
+                  let categoryDivs = document.querySelectorAll('[data-v-294cdcdc=""][data-v-040becfc=""] > [data-v-294cdcdc=""]');
+                  let categoryDiv = categoryDivs[categoryIndex];
+                  let productCards = categoryDiv.querySelectorAll('.product-card');
+                  let productCard = productCards[productIndex];
+
+                  await this.sleep(500);
+                  productCard.scrollIntoView();
+                  productCard.click();
+                  await this.sleep(1000);
+                  await this.openClosedComplementPanels();
+                  // Agora, vamos adicionar um atraso antes de coletar os dados.
+                  await this.sleep(1000);
+
+                  
+            let productModal = document.querySelector('.v-dialog.v-dialog--active.v-dialog--scrollable');
             let titleElement = productModal.querySelector('.font-weight-bold');
-            console.log("Titulo", titleElement)
-            let priceElement = productModal.querySelector('.font-weight-bold.mr-2');
-            console.log("Preço", priceElement)
-            let imgElement = productModal.querySelector('.v-image__image').style.backgroundImage.replace(/^url\(['"](.+)['"]\)/, '$1');
-            let descricaoElement = productModal.querySelector('.description.mb-0');
-            console.log("Descrição", descricaoElement)
+            let priceElement = productModal.querySelector('.font-weight-medium.mr-3');
+            let imageElement = productModal.querySelector('.v-image__image');
+            let imgElement = ""
+            if (imageElement && imageElement.style) {
+              const backgroundImage = imageElement.style.backgroundImage;
+          
+              if (backgroundImage) {
+                let imageUrl = backgroundImage.replace(/^url\(['"](.+)['"]\)/, '$1');
+                imgElement = imageUrl
+              }
+            }
+            
+            let descricaoElement = productModal.querySelector('span[data-v-f3708e2c]');
             let productTitle = titleElement ? titleElement.textContent : "";
             let priceText = priceElement ? priceElement.textContent : "";
             let productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
-            let imgSrc = imgElement ? imgElement.src : "";
+            let imgSrc = imgElement ? imgElement : "";
             let productDescricao = descricaoElement ? descricaoElement.textContent : "";
     
             let complementsDict = []
             let complementExpandables = document.querySelectorAll('div.v-expansion-panel');
+            
             for await (const complementExpandable of complementExpandables) {
               let complementElements = complementExpandable.querySelectorAll('.v-expansion-panel-header.product-expansion-panel__header');
+
               let optionsComplement = [];
               // Pegar o nome de cada complemento
               for await (const complementElement of complementElements) {
+
                 let typeComplementElement = complementElement.querySelector('.product-expansion-header__category-validation');
-                console.log("TypeComplement", typeComplementElement)
                 let requiredElement = complementElement.querySelector('span.btn-required.v-chip');
                 let complementNameElement = complementElement.querySelector('div.product-expansion-header__category-title');
-                console.log("Nome do complemento", complementNameElement)
                 
                 let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
-                let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
+                console.log("TIPO COMPLEMENTO:",  typeComplementText)
+                console.log("ELEMENTO COMPLEMENTO:",  complementElement)
+                let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText.trim(), complementElement);
+
                 let required = requiredElement ? requiredElement.textContent : "";
                 let complementName = complementNameElement ? complementNameElement.textContent : "";
+                
+                
                 // Pegar nome de cada opção do complemento da iteração
 
-                let optionsElement = complementExpandable.querySelectorAll('.v-radio, .v-input');
+                let optionsElement = complementExpandable.querySelectorAll('.v-radio, .v-input,.topping-incrementable__btn');
+                
+                let optionTitle = "";
+                let optionPrice = "0";
+                let optionDescription = "";
 
                 for await (const optionElement of optionsElement) {
-                  let optionTitle = "";
-                  let optionPrice = "0";
-                  let optionDescription = "";
 
-                if (optionElement.classList.contains('.v-radio')) {
+                if (optionElement.classList.contains('v-radio')) {
                   // Se a classe for 'radio', trata como um rádio.
-                  let optionTitleElement = optionElement.querySelector('.product-price-radio__labe');
+                  let optionTitleElement = optionElement.querySelector('.product-price-radio__label');
                   let optionPriceElement = optionElement.querySelector('.product-price-radio__price');
-                  
                   optionTitle = optionTitleElement.textContent.trim();
                   let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
                   optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
-
                   
-                  console.log({optionPrice, optionTitle})
+                    
                   
-                }else if (optionElement.classList.contains('.v-input')) {
+                  
+                }else if (optionElement.classList.contains('v-input')) {
                   // Se a classe for 'checkbox', trata como um checkbox.
-                  // let optionLabelElement = optionElement.querySelector('label');
+                  let optionDivElement = optionElement.querySelector('.topping-checkbox__label');
+
+                  if (optionDivElement) {
+
+                    let optionText = optionDivElement.textContent;
+                    console.log(optionText);
+                    let optionParts = optionText.split(/\s*\+\s*/);
+                    optionTitle = optionParts[0].trim();
+                    optionPrice = optionParts[1] ? optionParts[1].trim().replace(/[^\d,.]/g, '').replace(',', '.') : "0";
+                    
+                    
+                    // Certificar-se de que optionPriceText seja uma string antes de tentar acessar a propriedade textContent
+                    
+                    
+                  } 
+
+
+                    
                   
-                  // if (optionLabelElement) {
-                  //   let optionLabelContent = optionLabelElement.textContent.trim();
-                  //   optionTitle = optionLabelContent.split('+')[0].trim();
-                  //   let optionPriceText = optionLabelContent.split('+')[1];
-                  //   optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
-
-                  //   console.log({optionPrice, optionTitle})
-                  // } PAREI AQ
+                }else if (optionElement.classList.contains('topping-incrementable__btn')) {
+                  let optionTitleElement = optionElement.querySelector('.topping-incrementable__label');
+                  let optionPriceElement = optionElement.querySelector('.topping-incrementable__price');
+                  
+                  let optionTitleText = optionTitleElement.textContent.trim();
+                  optionTitle = optionTitleText
+                  let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
+                  optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  
+                  
                 }
-
+                
+                
                   optionsComplement.push({
                     optionTitle: optionTitle,
                     optionPrice: optionPrice,
                     optionDescription: optionDescription
                   });
                 }
+                
     
                 complementsDict.push({
                   nameComplement: complementName,
@@ -173,6 +292,16 @@ class ScrapyOlaClick {
                   required: required,
                   options: optionsComplement
                 })
+                console.log("- - - - - - - - - - - - - - - - - ")
+                console.log("NOME DO COMPLEMENTO: ",complementName)
+                console.log("TEXTO DO TIPO DO COMPLEMENTO: ",typeComplementText.trim())
+                console.log("TIPO DO COMPLEMENT: ",typeComplement)
+                console.log("QUANTIDADE MIN: ",minQtd)
+                console.log("QUANTIDADE MAX: ",maxQtd)
+                console.log("REQUERED: ",required)
+                console.log("OPÇOES: ",optionsComplement)
+                console.log("- - - - - - - - - - - - - - - - - ")
+                console.log("                                  ")
               }
             }
     
@@ -183,34 +312,65 @@ class ScrapyOlaClick {
               descricao: productDescricao,
               complementsDict: complementsDict
             });
+            console.log("- - - - - - - - - - - - - - - - - ")
+            console.log("NOME PRODUTO: ", productTitle)
+            console.log("PREÇO PRODUTO: ", productPrice)
+            console.log("IMAGEM: ", imgSrc)
+            console.log("DESCRIÇAO: ", productDescricao)
+            console.log("- - - - - - - - - - - - - - - - - ")
+            console.log("                                  ")
             await this.backPage();
-          
-        }
-        this.scrapedData.push({
-          categoryName: categoryName,
-          productsCategory: productData
-        });
-        await this.backPage();
-      }
-      //alert("Finalizado!")
+            
           }
         
-    
+                  
+              
+              this.scrapedData.push({
+                  categoryName: categoryName,
+                  productsCategory: productData
+              });
+        }
+              //  await this.backPage();
+          
+      }
+      //alert("Finalizado!")
   }
-  
-  
-      async backPage() {
+
+  async backPage() {
         console.log("Voltou!")
         await this.sleep(1000);
-        let productModal = document.querySelector('.rounded-t-lg.rounded-b-0');
-        let back = productModal.querySelector('button.appbar-close-button, button.v-btn.v-btn--icon').click()
+        let productModal = document.querySelector('.v-dialog.v-dialog--active.v-dialog--scrollable');
+        let back = productModal.querySelector('button.v-btn.v-btn--fab.v-btn--has-bg.v-btn--round.theme--dark.v-size--default')
         if (back) {
           back.click()
       }
         await this.sleep(1000);
-      }
-
   }
+
+  async openClosedComplementPanels() {
+    // Seletor do modal
+    let productModal = document.querySelector('.v-dialog.v-dialog--active.v-dialog--scrollable');
+  
+    if (productModal) {
+      // Encontrar todos os painéis de complemento dentro do modal
+      let complementPanels = productModal.querySelectorAll('.v-expansion-panel.product-expansion-panel');
+  
+      // Iterar sobre os painéis
+      complementPanels.forEach((panel) => {
+        // Verificar se o painel está fechado
+        let isClosed = !panel.getAttribute('aria-expanded') || panel.getAttribute('aria-expanded') === 'false';
+  
+        if (isClosed) {
+          // Encontrar o botão dentro do painel fechado e clicar nele
+          let closeButton = panel.querySelector('.v-expansion-panel-header.product-expansion-panel__header');
+          if (closeButton) {
+            closeButton.click();
+          }
+        }
+      });
+    }
+  }
+
   
   
- 
+}
