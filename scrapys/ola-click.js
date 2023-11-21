@@ -6,42 +6,26 @@ class ScrapyOlaClick {
 
   sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-    async checkRepetition(complementExpandable) {
+    async checkRepetition(complementExpandable) { 
     let button = complementExpandable.querySelector('.topping-incrementable__btn');
-    let plusButton = complementExpandable.querySelector(".incrementable-buttons__btn.v-btn.v-btn--text.theme--light.v-size--default[style*='--primary-color']")
-    if (button || plusButton) {
-        return { repetition: "com repeticao" };
+    if (button) {
+      return "com repeticao";
     } else {
-        return { repetition: "sem repeticao" };
+      return "sem repeticao";
     }
 }
 
         async processTypeComplement(typeComplement, complementExpandable) {
-          console.log("ENTROU 1111")
             console.log('typeComplement:', typeComplement);
-            let productModal = document.querySelector('.v-dialog.v-dialog--active.v-dialog--scrollable');
             const complement = typeComplement.trim();
-           let repetition = ""; // Declare a variável aqui com um valor padrão
 
-            if (!complementExpandable) {
-                ({ repetition } = await this.checkRepetition(productModal));
-                console.log("ENTROU 2222")
-            } else {
-                ({ repetition } = await this.checkRepetition(complementExpandable));
-                console.log("ENTROU 3333")
-            }
-            console.log('repetition:', repetition);
+            let repetition = await this.checkRepetition(complementExpandable);
             let type = "";
             let minQtd = 0;
             let maxQtd = 0;
 
 
-            if (!typeComplement && !complementExpandable) {
-              type = "Apenas uma opção " + repetition;
-              minQtd = 1;
-              maxQtd = "";
-              console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
-          } else{
+            
             const matchSelect = complement.match(/^Selecione (\d+) opções/);
             const matchSelectMin = complement.match(/^Selecione o mínimo (\d+) opção/);
             const matchSelectUntil = complement.match(/^Selecione até (\d+) opções/);
@@ -87,11 +71,11 @@ class ScrapyOlaClick {
                 maxQtd = maxItems
                 console.log('minQtd:', minQtd, 'maxqtd', maxQtd);
             }
-
-          }
             return [type, minQtd, maxQtd];
+          }
+            
         
-      }
+      
 
   async scrollSmoothly(targetY, duration) {
     const startingY = window.scrollY || document.documentElement.scrollTop;
