@@ -7,12 +7,25 @@ class ScrapyOlaClick {
   sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     async checkRepetition(complementExpandable) { 
-    let button = complementExpandable.querySelector('.topping-incrementable__btn');
-    if (button) {
+    const chooserDiv = complementExpandable.querySelector('div.topping-incrementable.py-2.mb-0');
+    
+    if(chooserDiv){  
+    const plusButton = chooserDiv.querySelector('button.topping-incrementable__btn');    
+    plusButton.click(); 
+    await this.sleep(200)
+    plusButton.click();
+    await this.sleep(1000)
+    const counter = chooserDiv.querySelector('.topping-incrementable__quantity');
+    const counterValue = parseInt(counter.textContent, 10);
+    if (counterValue > 1) {
       return "com repeticao";
-    } else {
+    }else {
       return "sem repeticao";
     }
+    }else {
+      return "sem repeticao";
+    }
+
 }
 
         async processTypeComplement(typeComplement, complementExpandable) {
@@ -197,7 +210,7 @@ class ScrapyOlaClick {
                 let complementNameElement = complementElement.querySelector('div.product-expansion-header__category-title');
                 
                 let typeComplementText = typeComplementElement ? typeComplementElement.textContent : "";
-                let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText.trim(), complementElement);
+                let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText.trim(), complementExpandable);
 
                 let required = requiredElement ? requiredElement.textContent : "";
                 let complementName = complementNameElement ? complementNameElement.textContent : "";
