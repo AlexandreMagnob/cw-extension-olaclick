@@ -17,18 +17,20 @@ class ScrapyHubt {
 
         async processTypeComplement(typeComplement,complementExpandable) {
             console.log('typeComplement:', typeComplement);
+            let type = "" ;
+            let minQtd = 0;
+            let maxQtd = 0;
+            if(!typeComplement == ""){
             let { repetition } = await this.checkRepetition(complementExpandable);
             console.log('repetition:', repetition);
-            let type = "Apenas uma opção " + repetition;
-            let minQtd = 1;
-            let maxQtd = 1;
-
-           
+            type = "Apenas uma opção " + repetition;
+            minQtd = 1;
+            maxQtd = 1;
+      
+            }
             return [type, minQtd, maxQtd];
         }
 
-      
-  
     async clickProductCards() {
       console.log("executando..")
       await this.sleep(1000)
@@ -40,6 +42,7 @@ class ScrapyHubt {
         let categoryDiv = categoryDivs[categoryIndex];
         let categoryNameElement = categoryDiv.querySelector('.module-title');
         let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
+        console.log("NOME DA CATEGORIA: ", categoryName)
         let productCards = categoryDiv.querySelectorAll(".ProductModule__ItemContainer-sc-1kmcc3y-0");
     
         let productData = [];
@@ -56,27 +59,32 @@ class ScrapyHubt {
             productCard.click();
             await this.sleep(1000);
 
-            let productModal = document.querySelector('.sc-fzplWN.hRBsWH.sc-fzpjYC.kBSpHI')
+            let productModal = document.querySelector('.sc-fzplWN.hRBsWH.sc-fzpjYC.gaFuok');
+            let complementElement = document.querySelector('.ProductItemDialog__PriceList-j5dr03-5.hLOrDr');
+            let notComplementElement = complementElement.querySelector('.price-Único');
             let titleElement = productModal.querySelector('.ProductItemDialog__DialogProductTitle-j5dr03-0');
-            let priceElement = "";
-
-            if(productModal.querySelector('.price-Único')){
-            priceElement = productModal.querySelector('price-description');
-            }
-
-            
-
-
-
-            let imgElement = productModal.querySelector('.DialogHeaderImage-sc-127fjht-0.ProductItemDialog__ProductHeaderImage-j5dr03-19.jgyFGh');
+            let imgElement = document.querySelector('.DialogHeaderImage-sc-127fjht-0.ProductItemDialog__ProductHeaderImage-j5dr03-19.xCWOZ');
             let imageUrl = imgElement ? window.getComputedStyle(imgElement).backgroundImage.replace(/^url\(["'](.+)["']\)$/, '$1') : null;
             let descricaoElement = productModal.querySelector('.ProductItemDialog__ProductDescription-j5dr03-2.bxZGzY');
             let productTitle = titleElement ? titleElement.textContent : "";
-            let priceText = priceElement ? priceElement.textContent : "";
-            let productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
             let imgSrc = imageUrl ? imageUrl : "";
             let productDescricao = descricaoElement ? descricaoElement.textContent : "";
-    
+            let productPrice = "";
+            let notComplement = "";
+
+            if(notComplementElement){
+            notComplement = notComplementElement.textContent
+            
+            let priceElement = "";
+
+            if(notComplement == 'Único'){
+            priceElement = productModal.querySelector('.price-value');
+            }
+
+            
+            let priceText = priceElement ? priceElement.textContent : "";
+            productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
+          }
             let complementsDict = []
             
             let complementExpandables = document.querySelectorAll('.ProductItemDialog__PriceList-j5dr03-5.hLOrDr');
@@ -85,28 +93,32 @@ class ScrapyHubt {
 
               let optionsComplement = [];
                 
-                let typeComplementText = "Escolhe um Complemento"
-                let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
-                  
                 let required = "";
                 let complementName = "";
+                let typeComplementText = "";
 
-                if(!productModal.querySelector('.price-Único')){
-                 complementName =  "Escolha um complemento";
+                if(!notComplement == 'Único'){
+                typeComplementText =  "Escolha um complemento";
                 }
+                let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
                 // Pegar nome de cada opção do complemento da iteração
                 let optionsElement = complementExpandable.querySelectorAll('.ProductItemDialog__PriceItem-j5dr03-6.cRxigD');
                 for await (const optionElement of optionsElement) {
+                  let optionTitle = "";
+                  let optionPrice = "";
+                  let optionDescription = "";
+
+                  if(!productModal.querySelector('.price-Único')){
                   let optionTitleElement = optionElement.querySelector('span.price-description');
                   let optionPriceElement = optionElement.querySelector('.price-value');
                   
     
-                  let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
+                  optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
                   let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
                   //let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
                   let optionDescription = "";
-    
+                  }
                   optionsComplement.push({
                     optionTitle: optionTitle,
                     optionPrice: optionPrice,
@@ -156,6 +168,7 @@ class ScrapyHubt {
           categoryName: categoryName,
           productsCategory: productData
         });
+        
         await this.backPage();
       }
       //alert("Finalizado!")
