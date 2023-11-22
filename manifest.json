@@ -22,13 +22,15 @@
       "matches": [
         "https://*.anota.ai/*",
         "https://*.menudino.com/*",
-        "https://*.ola.click/*"
+        "https://*.ola.click/*",
+        "https://www.hubt.com.br/*"
       ],
       "js": [
         "papaparse.min.js",
         "scrapys/anotai.js",  
         "scrapys/menudino.js",
         "scrapys/ola-click.js",
+        "scrapys/hubt.js",
         "handlerScrapy.js",
         "sheet_generation.js"
       ],
