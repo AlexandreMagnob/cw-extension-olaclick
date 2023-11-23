@@ -20,6 +20,7 @@ class ScrapyHubt {
             let type = "" ;
             let minQtd = 0;
             let maxQtd = 0;
+
             if(!typeComplement == ""){
             let { repetition } = await this.checkRepetition(complementExpandable);
             console.log('repetition:', repetition);
@@ -59,11 +60,11 @@ class ScrapyHubt {
             productCard.click();
             await this.sleep(1000);
 
-            let productModal = document.querySelector('.sc-fzplWN.hRBsWH.sc-fzpjYC.gaFuok');
+            let productModal = document.querySelector('.sc-fzplWN.hRBsWH.sc-fzpjYC');
             let complementElement = document.querySelector('.ProductItemDialog__PriceList-j5dr03-5.hLOrDr');
             let notComplementElement = complementElement.querySelector('.price-Único');
             let titleElement = productModal.querySelector('.ProductItemDialog__DialogProductTitle-j5dr03-0');
-            let imgElement = document.querySelector('.DialogHeaderImage-sc-127fjht-0.ProductItemDialog__ProductHeaderImage-j5dr03-19.xCWOZ');
+            let imgElement = document.querySelector('.DialogHeaderImage-sc-127fjht-0.ProductItemDialog__ProductHeaderImage-j5dr03-19');
             let imageUrl = imgElement ? window.getComputedStyle(imgElement).backgroundImage.replace(/^url\(["'](.+)["']\)$/, '$1') : null;
             let descricaoElement = productModal.querySelector('.ProductItemDialog__ProductDescription-j5dr03-2.bxZGzY');
             let productTitle = titleElement ? titleElement.textContent : "";
@@ -85,6 +86,7 @@ class ScrapyHubt {
             let priceText = priceElement ? priceElement.textContent : "";
             productPrice = priceText.replace(/[^\d,.]/g, '').replace('.', ',')
           }
+
             let complementsDict = []
             
             let complementExpandables = document.querySelectorAll('.ProductItemDialog__PriceList-j5dr03-5.hLOrDr');
@@ -97,7 +99,7 @@ class ScrapyHubt {
                 let complementName = "";
                 let typeComplementText = "";
 
-                if(!notComplement == 'Único'){
+                if(notComplement !== 'Único'){
                 typeComplementText =  "Escolha um complemento";
                 }
                 let [typeComplement, minQtd, maxQtd] = await this.processTypeComplement(typeComplementText, complementExpandable)
