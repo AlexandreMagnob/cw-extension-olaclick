@@ -94,9 +94,9 @@ class ScrapyHubt {
             for await (const complementExpandable of complementExpandables) {
 
               let optionsComplement = [];
-                
+              
                 let required = "";
-                let complementName = "";
+                let complementName = "Escolha um Complemento";
                 let typeComplementText = "";
 
                 if(notComplement !== 'Único'){

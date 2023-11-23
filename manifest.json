@@ -23,7 +23,8 @@
         "https://*.anota.ai/*",
         "https://*.menudino.com/*",
         "https://*.ola.click/*",
-        "https://www.hubt.com.br/*"
+        "https://www.hubt.com.br/*",
+        "https://app.jotaja.com/*"
       ],
       "js": [
         "papaparse.min.js",
@@ -31,6 +32,7 @@
         "scrapys/menudino.js",
         "scrapys/ola-click.js",
         "scrapys/hubt.js",
+        "scrapys/jotaja.js",
         "handlerScrapy.js",
         "sheet_generation.js"
       ],
