@@ -8,10 +8,11 @@ class ScrapyJotaja {
   
     
    
-  
-  
+
+
       async checkRepetition(complementExpandable) {
         const chooserDiv = complementExpandable.querySelector('.inputItem_container__o31iB');
+        if(chooserDiv){
         const plusButton = chooserDiv.querySelector('#mais');      
         plusButton.click(); 
         await this.sleep(500)
@@ -21,13 +22,14 @@ class ScrapyJotaja {
         const counterValue = parseInt(counter.value, 10);
         if (counterValue > 1) {
           return "com repeticao";
-        } else {
-          return "sem repeticao";
-        }
+        } 
+      }else {
+        return "sem repeticao";
+      }
       }
   
       async processTypeComplement(typeComplement, complementExpandable) {
-        const complement = typeComplement !== "" ? typeComplement : "";
+        const complement = typeComplement.trim();
         let repetition = await this.checkRepetition(complementExpandable);
         let type = "";
         let minQtd = 0;
@@ -46,12 +48,12 @@ class ScrapyJotaja {
           maxQtd = 1;
           console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
         }
-        }else if (complement.startsWith("Selecione até ")) {
-          const maxItems = parseInt(complement.match(/\d+/)[1], 10);
+        }else if (complement.match(/^Selecione até (\d+) Itens/)) {
+          const maxItems = parseInt(complement.match(/^Selecione até (\d+) Itens/)[1], 10);
           type = 'Mais de uma opcao ' + repetition;
           maxQtd = maxItems;
           console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
-        } else if (complement.match(/^Escolha de \d+ até \d+ itens$/)) {
+        } else if (complement.match(/^Escolha de \d+ até \d+ Itens$/)) {
           const minMaxItems = complement.match(/\d+/g);
           const minItems = parseInt(minMaxItems[0], 10);
           const maxItems = parseInt(minMaxItems[1], 10);
@@ -66,6 +68,7 @@ class ScrapyJotaja {
   
     async clickProductCards() {
       console.log("executando..")
+      await this.closeModal();
       await this.sleep(1000)
       let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
     
@@ -80,7 +83,7 @@ class ScrapyJotaja {
         let productData = [];
         let complementsDict;
         for await (const productIndex of [...Array(productCards.length).keys()]) {
-          await this.sleep(1000)
+          await this.sleep(2000)
           let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
           let categoryDiv = categoryDivs[categoryIndex];
           let productCards = categoryDiv.querySelectorAll((".listaProdutos_itemInlineDiv__Lpfvs"));
@@ -101,17 +104,18 @@ class ScrapyJotaja {
         imgSrc = imgElement ? imgElement.src : "";
         productDescricao = descricaoElement ? descricaoElement.textContent : "";
         
-          let productClickEvent = productCard.querySelector('.ItemInline_itemProdInline__Jdi4l');
+          let productClickEvent = productCard.querySelector(".listaProdutos_itemInlineDiv__Lpfvs a[href]");
 
           if (productClickEvent) {  
             await this.sleep(500);
             productClickEvent.click();
+            console.log("CLicou")
             productClickEvent.scrollIntoView();
 
-            await this.sleep(1000)
+            await this.sleep(2000)
             
             complementsDict = []
-            await this.sleep(1000)
+            await this.sleep(2000)
             let formElement = document.querySelector("form")
             let complementExpandables = formElement.querySelectorAll('div:has(> .opcionais_itemOpcional__ZLk8q)');
             for await (const complementExpandable of complementExpandables) {
@@ -131,18 +135,36 @@ class ScrapyJotaja {
                 let required = requiredElement ? requiredElement.textContent : "";
                 let complementName = complementNameElement ? complementNameElement.textContent : "";
                 // Pegar nome de cada opção do complemento da iteração
-                let optionsElement = complementExpandable.querySelectorAll('label');
+                
 
-                for await (const optionElement of optionsElement) {
+                let optionsElements = document.querySelectorAll('.listaInputIncremental_OptionalWithImg__7xtBD, .listaInputRadio_OptionalWithImg__gA0q3');
+                
+                let optionTitle = "";
+                let optionPrice = "0";
+                let optionDescription = "";
+
+                for await (const optionElement of optionsElements) {
+                  
+                  if(optionElement.classList.contains('listaInputIncremental_OptionalWithImg__7xtBD')){
+
                   let optionTitleElement = optionElement.querySelector('h3');
                   let optionPriceElement = optionElement.querySelector('div > div > div');
                   //let optionQtdElement = optionElement.querySelector('span.text-grey-3');
                 
-                  let optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
+                  optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
                   let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                  let optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                  optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
                   //let optionQtd = optionQtdElement ? optionQtdElement.textContent : "";
-                  let optionDescription = "";
+                  }else if(optionElement.classList.contains('listaInputRadio_OptionalWithImg__gA0q3')){
+
+                  let optionTitleElement = optionElement.querySelector('h3');
+                  let optionPriceElement = optionElement.querySelector('div > div > div');
+                    //let optionQtdElement = optionElement.querySelector('span.text-grey-3');
+                  
+                  optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
+                  let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
+                  optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.')
+                  }
     
                   optionsComplement.push({
                     optionTitle: optionTitle,
@@ -179,7 +201,6 @@ class ScrapyJotaja {
               descricao: productDescricao,
               complementsDict: complementsDict
             });
-            await this.backPage();
             console.log("- - - - - - - - - - - - - - - - - ")
             console.log("NOME PRODUTO: ", productTitle)
             console.log("PREÇO PRODUTO: ", productPrice)
@@ -187,7 +208,9 @@ class ScrapyJotaja {
             console.log("DESCRIÇAO: ", productDescricao)
             console.log("- - - - - - - - - - - - - - - - - ")
             console.log("                                  ")
-            
+            await this.backPage();
+            await this.sleep(1000)
+            await this.closeModal();
         }
         this.scrapedData.push({
           categoryName: categoryName,
@@ -205,9 +228,16 @@ class ScrapyJotaja {
     if (back) {
       console.log("Voltou")
       back.click()
-  }}
+  }
+}
+
+    async closeModal(){
+      console.log("ADEUS MODAL ")
+      let modal = document.querySelector('.modal_modal__xIBsf ')
+      if(modal){
+        let buttonClose = modal.querySelector('button')
+        buttonClose.click()
+      }
+    }
   }
   
-  
-  // Chame a função desativarAlerta antes de executar outras ações
-  desativarAlerta();
