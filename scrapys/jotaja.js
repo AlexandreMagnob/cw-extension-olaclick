@@ -34,20 +34,23 @@ class ScrapyJotaja {
         let maxQtd = 0;
       
         if (complement.match(/^Selecione (\d+) Item/)) {
-          const itemCount = parseInt(complement.match(/^Selecione (\d+) item/)[1], 10);
+          const itemCount = parseInt(complement.match(/^Selecione (\d+) Item/)[1], 10);
           if (itemCount !== 1) {
             type = 'Mais de uma opcao ' + repetition;
             minQtd = itemCount;
             maxQtd = itemCount;
-            console.log(minQtd,maxQtd)}
-        }else if(complement == "Selecione 1 Item"){
+            console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+        }else(itemCount == "Selecione 1 Item");{
           type = "Apenas uma opcao";
           minQtd = 1;
           maxQtd = 1;
+          console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+        }
         }else if (complement.startsWith("Selecione até ")) {
-          const maxItems = parseInt(complement.match(/\d+/)[0], 10);
+          const maxItems = parseInt(complement.match(/\d+/)[1], 10);
           type = 'Mais de uma opcao ' + repetition;
           maxQtd = maxItems;
+          console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
         } else if (complement.match(/^Escolha de \d+ até \d+ itens$/)) {
           const minMaxItems = complement.match(/\d+/g);
           const minItems = parseInt(minMaxItems[0], 10);
@@ -55,6 +58,7 @@ class ScrapyJotaja {
           type = 'Mais de uma opcao ' + repetition;
           minQtd = minItems;
           maxQtd = maxItems;
+          console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
         }
         return [type, minQtd, maxQtd];
       }
