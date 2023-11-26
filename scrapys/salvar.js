@@ -1,11 +1,5 @@
 document.documentElement.style.scrollBehavior = 'none';
 
-const modalElement = document.querySelector('.modal_modal__xIBsf ');
-
-if (modalElement) {
-  modalElement.parentNode.removeChild(modalElement);
-}
-
 class ScrapyJotaja {
     constructor() {
       this.scrapedData = [];
@@ -15,17 +9,7 @@ class ScrapyJotaja {
     sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
   
     
-      async waitForElement(selector) {
-        return new Promise(resolve => {
-          const intervalId = setInterval(() => {
-            const element = document.querySelector(selector);
-            if (element) {
-              clearInterval(intervalId);
-              resolve(element);
-            }
-          }, 100);
-        });
-      }
+   
 
 
       async checkRepetition(complementExpandable) {
@@ -130,9 +114,9 @@ class ScrapyJotaja {
 
             complementsDict = []
             await this.sleep(2000)
-            const formElement = await this.waitForElement("form");
-            const complementExpandables = formElement.querySelectorAll('div:has(> .opcionais_itemOpcional__ZLk8q)');
-
+            let formElement = document.querySelector("form")
+            let complementExpandables = formElement.querySelectorAll('div:has(> .opcionais_itemOpcional__ZLk8q)');
+            
             for await (const complementExpandable of complementExpandables) {
               let complementElements = complementExpandable.querySelectorAll('.opcionais_itemOpcional__ZLk8q');
               
