@@ -27,6 +27,16 @@ class ScrapyJotaja {
             }
           }, 1000);
         });
+      }async waitForVisibleElementInContext(context, selector) {
+        return new Promise(resolve => {
+          const intervalId = setInterval(() => {
+            const element = context.querySelectorAll(selector);
+            if (element) {
+              clearInterval(intervalId);
+              resolve(element);
+            }
+          }, 1000);
+        });
       }
 
 
@@ -89,23 +99,24 @@ class ScrapyJotaja {
     async clickProductCards() {
       
       console.log("executando..")
-      await this.closeModal();
+      // await this.closeModal();
       await this.sleep(1000)
-      let categoryDivs = await this.waitForElementAll('.listaProdutos_boxListaProdutos__9fIq6');
+      let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
     
       for await (const categoryIndex of [...Array(categoryDivs.length).keys()]) {
-        let categoryDivs = await this.waitForElementAll('.listaProdutos_boxListaProdutos__9fIq6');
+        let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
         let categoryDiv = categoryDivs[categoryIndex];
         let categoryNameElement = categoryDiv.querySelector('h2');
         let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-        let productCards = categoryDiv.querySelectorAll(".listaProdutos_itemInlineDiv__Lpfvs");
-    
+        let productCards = await this.waitForVisibleElementInContext(categoryDiv,".listaProdutos_itemInlineDiv__Lpfvs");
+        console.log(productCards)
+        
         let productData = [];
-        let complementsDict;
+        let complementsDict = [];
         for await (const productIndex of [...Array(productCards.length).keys()]) {
-          let categoryDivs = await this.waitForElementAll('.listaProdutos_boxListaProdutos__9fIq6');
+          let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
           let categoryDiv = categoryDivs[categoryIndex];
-          let productCards = categoryDiv.querySelectorAll(".listaProdutos_itemInlineDiv__Lpfvs");
+          let productCards = await this.waitForVisibleElementInContext(categoryDiv,".listaProdutos_itemInlineDiv__Lpfvs");
           let productCard = productCards[productIndex];
           let productTitle = ""
           let productPrice = ""
@@ -127,24 +138,24 @@ class ScrapyJotaja {
 
           if (productClickEvent) {
             productClickEvent.scrollIntoView() 
-            await this.sleep(1000)
             productClickEvent.click();
             console.log("CLicou")
             await this.sleep(1000)
 
-            complementsDict = []
-            await this.sleep(2000)
+            
             const formElement = await this.waitForElement("form");
-            const complementExpandables = formElement.querySelectorAll('div:has(> .opcionais_itemOpcional__ZLk8q)');
+            const complementExpandables = await this.waitForVisibleElementInContext(formElement,'div:has(> .opcionais_itemOpcional__ZLk8q)');
 
             for await (const complementExpandable of complementExpandables) {
               let complementElements = complementExpandable.querySelectorAll('.opcionais_itemOpcional__ZLk8q');
               
               
-              let optionsComplement = [];
+              
     
               // Pegar o nome de cada complemento
               for await (const complementElement of complementElements) {
+                let optionsComplement = [];
+                
                 let typeComplementElement = complementElement.querySelector('h4');
                 let complementNameElement = complementElement.querySelector('h2');
                 let requiredElement = complementElement.querySelector('small');
@@ -213,16 +224,16 @@ class ScrapyJotaja {
               descricao: productDescricao,
               complementsDict: complementsDict
             });
-            // console.log("- - - - - - - - - - - - - - - - - ")
-            // console.log("NOME PRODUTO: ", productTitle)
-            // console.log("PREÇO PRODUTO: ", productPrice)
+             console.log("- - - - - - - - - - - - - - - - - ")
+             console.log("NOME PRODUTO: ", productTitle)
+             console.log("PREÇO PRODUTO: ", productPrice)
             // console.log("IMAGEM: ", imgSrc)
             // console.log("DESCRIÇAO: ", productDescricao)
-            // console.log("- - - - - - - - - - - - - - - - - ")
-            // console.log("                                  ")
+            console.log("- - - - - - - - - - - - - - - - - ")
+            console.log("                                  ")
             await this.backPage();
             await this.sleep(2000)
-            await this.closeModal();
+            // await this.closeModal();
         }
         this.scrapedData.push({
           categoryName: categoryName,
@@ -248,12 +259,13 @@ class ScrapyJotaja {
     let modalElement = document.querySelector('.modal_boxModal__820K1');
 
     if (modalElement) {
+      console.log("ADEUS MODAL")
       modalElement.style.display = 'none';
+    }else{
+      
     }
   
   }
-
-
   }
 
   
