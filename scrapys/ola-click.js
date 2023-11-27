@@ -157,7 +157,7 @@ class ScrapyOlaClick {
             console.log(productCards);
         
               let productData = [];
-
+ 
               for await (const productIndex of [...Array(productCards.length).keys()]) {
                   await this.sleep(1000);
                   let categoryDivs = document.querySelectorAll('[data-v-294cdcdc=""][data-v-040becfc=""] > [data-v-294cdcdc=""]');
