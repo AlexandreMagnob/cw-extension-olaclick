@@ -71,18 +71,18 @@ class ScrapyJotaja {
             type = 'Mais de uma opcao ' + repetition;
             minQtd = itemCount;
             maxQtd = itemCount;
-            console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            
           }else(itemCount == "Selecione 1 Item");{
             type = "Apenas uma opcao";
             minQtd = 1;
             maxQtd = 1;
-            console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+            
         }
         }else if (complement.match(/^Selecione até (\d+) Itens/)) {
           const maxItems = parseInt(complement.match(/^Selecione até (\d+) Itens/)[1], 10);
           type = 'Mais de uma opcao ' + repetition;
           maxQtd = maxItems;
-          console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+        
         }else if (complement.match(/^Escolha de \d+ até \d+ Itens$/)) {
           const minMaxItems = complement.match(/\d+/g);
           const minItems = parseInt(minMaxItems[0], 10);
@@ -90,7 +90,7 @@ class ScrapyJotaja {
           type = 'Mais de uma opcao ' + repetition;
           minQtd = minItems;
           maxQtd = maxItems;
-          console.log('minQtd:', minQtd, 'maxQtd:', maxQtd);
+        
         }
         return [type, minQtd, maxQtd];
       }
@@ -112,7 +112,7 @@ class ScrapyJotaja {
         console.log(productCards)
         
         let productData = [];
-        let complementsDict = [];
+        
         for await (const productIndex of [...Array(productCards.length).keys()]) {
           let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
           let categoryDiv = categoryDivs[categoryIndex];
@@ -135,7 +135,7 @@ class ScrapyJotaja {
         productDescricao = descricaoElement ? descricaoElement.textContent : "";
         
           let productClickEvent = productCard.querySelector(".listaProdutos_itemInlineDiv__Lpfvs a[href]");
-
+          let complementsDict = [];
           if (productClickEvent) {
             productClickEvent.scrollIntoView() 
             productClickEvent.click();
@@ -148,13 +148,13 @@ class ScrapyJotaja {
 
             for await (const complementExpandable of complementExpandables) {
               let complementElements = complementExpandable.querySelectorAll('.opcionais_itemOpcional__ZLk8q');
-              
+              let optionsComplement = [];
               
               
     
               // Pegar o nome de cada complemento
               for await (const complementElement of complementElements) {
-                let optionsComplement = [];
+                
                 
                 let typeComplementElement = complementElement.querySelector('h4');
                 let complementNameElement = complementElement.querySelector('h2');
@@ -167,7 +167,7 @@ class ScrapyJotaja {
                 // Pegar nome de cada opção do complemento da iteração
                 
 
-                let optionsElements = await this.waitForElementAll('.listaInputIncremental_OptionalWithImg__7xtBD, .listaInputRadio_OptionalWithImg__gA0q3');
+                let optionsElements = await this.waitForVisibleElementInContext(complementExpandable,'.listaInputIncremental_OptionalWithImg__7xtBD, .listaInputRadio_OptionalWithImg__gA0q3');
                 
                 let optionTitle = "";
                 let optionPrice = "0";
@@ -186,7 +186,7 @@ class ScrapyJotaja {
                     let optionPriceElement = optionElement.querySelector('div > div > div');
                     optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
                     let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                    optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.')
+                    optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace('.', ',')
                   }
     
                   optionsComplement.push({
@@ -195,7 +195,7 @@ class ScrapyJotaja {
                     optionDescription: optionDescription
                   });
                 }
-    
+              
                 complementsDict.push({
                   nameComplement: complementName,
                   typeComplement: typeComplement,
@@ -204,16 +204,16 @@ class ScrapyJotaja {
                   required: required,
                   options: optionsComplement
                 })
-                // console.log("- - - - - - - - - - - - - - - - - ")
-                // console.log("NOME DO COMPLEMENTO: ",complementName)
-                // console.log("TEXTO DO TIPO DO COMPLEMENTO: ",typeComplementText.trim())
-                // console.log("TIPO DO COMPLEMENT: ",typeComplement)
-                // console.log("QUANTIDADE MIN: ",minQtd)
-                // console.log("QUANTIDADE MAX: ",maxQtd)
-                // console.log("REQUERED: ",required)
-                // console.log("OPÇOES: ",optionsComplement)
-                // console.log("- - - - - - - - - - - - - - - - - ")
-                // console.log("                                  ")
+                console.log("- - - - - - - - - - - - - - - - - ")
+                console.log("NOME DO COMPLEMENTO: ",complementName)
+                console.log("TEXTO DO TIPO DO COMPLEMENTO: ",typeComplementText.trim())
+                console.log("TIPO DO COMPLEMENT: ",typeComplement)
+                console.log("QUANTIDADE MIN: ",minQtd)
+                console.log("QUANTIDADE MAX: ",maxQtd)
+                console.log("REQUERED: ",required)
+                console.log("OPÇOES: ",optionsComplement)
+                console.log("- - - - - - - - - - - - - - - - - ")
+                console.log("                                  ")
               }
             }
             }
@@ -233,7 +233,7 @@ class ScrapyJotaja {
             console.log("                                  ")
             await this.backPage();
             await this.sleep(2000)
-            // await this.closeModal();
+            await this.closeModal();
         }
         this.scrapedData.push({
           categoryName: categoryName,
