@@ -7,36 +7,54 @@ class ScrapyJotaja {
     sleep(ms) {     return new Promise(resolve => setTimeout(resolve, ms)); }
   
     
-      async waitForElement(selector) {
-        return new Promise(resolve => {
-          const intervalId = setInterval(() => {
-            const element = document.querySelector(selector);
-            if (element) {
-              clearInterval(intervalId);
-              resolve(element);
-            }
-          }, 1000);
-        });
-      }async waitForElementAll(selector) {
-        return new Promise(resolve => {
-          const intervalId = setInterval(() => {
-            const element = document.querySelectorAll(selector);
-            if (element) {
-              clearInterval(intervalId);
-              resolve(element);
-            }
-          }, 1000);
-        });
-      }async waitForVisibleElementInContext(context, selector) {
-        return new Promise(resolve => {
-          const intervalId = setInterval(() => {
-            const element = context.querySelectorAll(selector);
-            if (element) {
-              clearInterval(intervalId);
-              resolve(element);
-            }
-          }, 1000);
-        });
+      async waitForElement(selector,context) {
+        if(context){
+          return new Promise(resolve => {
+            const intervalId = setInterval(() => {
+              const element = context.querySelector(selector);
+              if (element) {
+                clearInterval(intervalId);
+                resolve(element);
+              }
+            }, 1000);
+          });
+        }
+        else{
+          return new Promise(resolve => {
+            const intervalId = setInterval(() => {
+              const element = document.querySelector(selector);
+              if (element) {
+                clearInterval(intervalId);
+                resolve(element);
+              }
+            }, 1000);
+          });
+        };
+
+      }async waitForElementAll(context,selector) {
+        if(context){
+          return new Promise(resolve => {
+            const intervalId = setInterval(() => {
+              const element = context.querySelectorAll(selector);
+              if (element) {
+                clearInterval(intervalId);
+                resolve(element);
+              }
+            }, 1000);
+          });
+        }
+        else{
+          return new Promise(resolve => {
+            const intervalId = setInterval(() => {
+              const element = document.querySelectorAll(selector);
+              if (element) {
+                clearInterval(intervalId);
+                resolve(element);
+              }
+            }, 1000);
+          });
+        }
+        ;
       }
 
 
@@ -108,7 +126,7 @@ class ScrapyJotaja {
         let categoryDiv = categoryDivs[categoryIndex];
         let categoryNameElement = categoryDiv.querySelector('h2');
         let categoryName = categoryNameElement ? categoryNameElement.textContent : "";
-        let productCards = await this.waitForVisibleElementInContext(categoryDiv,".listaProdutos_itemInlineDiv__Lpfvs");
+        let productCards = await this.waitForElementAll(categoryDiv,".listaProdutos_itemInlineDiv__Lpfvs");
         console.log(productCards)
         
         let productData = [];
@@ -116,7 +134,7 @@ class ScrapyJotaja {
         for await (const productIndex of [...Array(productCards.length).keys()]) {
           let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
           let categoryDiv = categoryDivs[categoryIndex];
-          let productCards = await this.waitForVisibleElementInContext(categoryDiv,".listaProdutos_itemInlineDiv__Lpfvs");
+          let productCards = await this.waitForElementAll(categoryDiv,".listaProdutos_itemInlineDiv__Lpfvs");
           let productCard = productCards[productIndex];
           let productTitle = ""
           let productPrice = ""
@@ -144,7 +162,7 @@ class ScrapyJotaja {
 
             
             const formElement = await this.waitForElement("form");
-            const complementExpandables = await this.waitForVisibleElementInContext(formElement,'div:has(> .opcionais_itemOpcional__ZLk8q)');
+            const complementExpandables = await this.waitForElementAll(formElement,'div:has(> .opcionais_itemOpcional__ZLk8q)');
 
             for await (const complementExpandable of complementExpandables) {
               let complementElements = complementExpandable.querySelectorAll('.opcionais_itemOpcional__ZLk8q');
@@ -167,7 +185,7 @@ class ScrapyJotaja {
                 // Pegar nome de cada opção do complemento da iteração
                 
 
-                let optionsElements = await this.waitForVisibleElementInContext(complementExpandable,'.listaInputIncremental_OptionalWithImg__7xtBD, .listaInputRadio_OptionalWithImg__gA0q3');
+                let optionsElements = await this.waitForElementAll(complementExpandable,'.listaInputIncremental_OptionalWithImg__7xtBD, .listaInputRadio_OptionalWithImg__gA0q3');
                 
                 let optionTitle = "";
                 let optionPrice = "0";
