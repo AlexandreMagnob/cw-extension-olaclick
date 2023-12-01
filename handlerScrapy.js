@@ -6,6 +6,7 @@ class HandlerScrapy {
       this.scrapyOlaClick = new ScrapyOlaClick();
       this.scrapyHubt = new ScrapyHubt();
       this.scrapyJotaja = new ScrapyJotaja();
+      this.ScrapyYooga = new ScrapyYooga();
     }
   
     async handleScrapyChoice(restaurante) {
@@ -43,6 +44,13 @@ class HandlerScrapy {
         const scrapedData = this.scrapyJotaja.scrapedData
         alert("Finalizado")
         const titleRestaurant = this.scrapyJotaja.titleRestaurant
+        await createCSV(scrapedData, titleRestaurant)
+
+      }else if (restaurante === 'Yooga') {
+        await this.ScrapyYooga.clickProductCards()
+        const scrapedData = this.ScrapyYooga.scrapedData
+        alert("Finalizado")
+        const titleRestaurant = this.ScrapyYooga.titleRestaurant
         await createCSV(scrapedData, titleRestaurant)
 
       }
