@@ -117,7 +117,7 @@ class ScrapyJotaja {
     async clickProductCards() {
       
       console.log("executando..")
-      // await this.closeModal();
+      await this.closeModal();
       await this.sleep(1000)
       let categoryDivs = document.querySelectorAll('.listaProdutos_boxListaProdutos__9fIq6');
     
@@ -142,7 +142,7 @@ class ScrapyJotaja {
           let productDescricao = ""
 
           
-        let titleElement = productCard.querySelector('h3');
+        let titleElement = await this.waitForElement('h3',productCard);
         let priceElement = productCard.querySelector('.ItemInline_preco__uJ1fw');
         let imgElement = productCard.querySelector('img[data-nimg]');
         let descricaoElement = productCard.querySelector('p');
@@ -198,7 +198,7 @@ class ScrapyJotaja {
                     let optionPriceElement = optionElement.querySelector('div > div > div');
                     optionTitle = optionTitleElement ? optionTitleElement.textContent : "";
                     let optionPriceText = optionPriceElement ? optionPriceElement.textContent : "0";
-                    optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace(',', '.');
+                    optionPrice = optionPriceText.replace(/[^\d,.]/g, '').replace('.', ',');
                   }else if(optionElement.classList.contains('listaInputRadio_OptionalWithImg__gA0q3')){
                     let optionTitleElement = optionElement.querySelector('h3');
                     let optionPriceElement = optionElement.querySelector('div > div > div');
@@ -274,7 +274,7 @@ class ScrapyJotaja {
 
   async closeModal() {
     await this.sleep(1000);
-    let modalElement = document.querySelector('.modal_boxModal__820K1');
+    let modalElement = await this.waitForElement('.modal_boxModal__820K1');
 
     if (modalElement) {
       console.log("ADEUS MODAL")
