@@ -31,7 +31,8 @@ class ScrapyYooga {
       
   
       async checkRepetition(complementExpandable) { 
-        const plusButton = complementExpandable.querySelector('.option-plus.md.hydrated');      
+        const plusButton = complementExpandable.querySelector('.option-plus.md.hydrated');     
+        if(plusButton){ 
         plusButton.click(); 
         await this.sleep(200)
         plusButton.click();
@@ -40,7 +41,8 @@ class ScrapyYooga {
         const counterValue = parseInt(counter.textContent, 10);
         if (counterValue > 1) {
           return "com repeticao";
-        } else {
+        } 
+      }else {
           return "sem repeticao";
         }
       }
@@ -50,28 +52,34 @@ class ScrapyYooga {
         let repetition = await this.checkRepetition(complementExpandable);
           let minQtd = 0;
           let maxQtd = 0;
-        
+          if (required === "OBRIGATÓRIO") {
+            minQtd = 1;
+          }
+
           const minMaxMatch = complement.match(/(\d+) (de|até) (\d+)/);
+          const minMatch = complement.match(/pelo menos (\d+)/);
+          const matchSelectUntil = complement.match(/^Escolha até (\d+) opções/);
+
           if (minMaxMatch) {
-            minQtd = parseInt(minMaxMatch[1], 10);
             maxQtd = parseInt(minMaxMatch[3], 10);
-          } else {
-            const minMatch = complement.match(/pelo menos (\d+)/);
+          }else if(minMatch){
             if (minMatch) {
               minQtd = parseInt(minMatch[1], 10);
+              
             }
-        
             const maxMatch = complement.match(/máx\. (\d+)/);
             if (maxMatch) {
               maxQtd = parseInt(maxMatch[1], 10);
             }
+            
+          }else if(matchSelectUntil){
+            maxQtd = parseInt(matchSelectUntil[1], 10);
+          }else if(complement === "Escolha até uma opção"){
+            maxQtd = 1
           }
         
-          if (required === "OBRIGATÓRIO") {
-            minQtd = 1;
-          }
         
-          let type = maxQtd > 1 ? "Mais de uma opcao " : "Apenas uma opcao " + repetition;
+          let type = maxQtd > 1 ? "Mais de uma opcao " + repetition : "Apenas uma opcao " + repetition;
         
           return [type, minQtd, maxQtd];
         }
@@ -182,7 +190,7 @@ class ScrapyYooga {
             console.log("- - - - - - - - - - - - - - - - - ")
             console.log("NOME PRODUTO: ", productTitle)
             console.log("PREÇO PRODUTO: ", productPrice)
-            // console.log("IMAGEM: ", imgSrc)
+            console.log("IMAGEM: ", imgSrc)
             // console.log("DESCRIÇAO: ", productDescricao)
             console.log("- - - - - - - - - - - - - - - - - ")
             console.log("                                  ")
@@ -207,4 +215,4 @@ class ScrapyYooga {
       back.click()
   }}
   }
-  
+ 
