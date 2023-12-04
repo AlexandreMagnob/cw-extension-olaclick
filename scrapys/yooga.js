@@ -41,7 +41,9 @@ class ScrapyYooga {
         const counterValue = parseInt(counter.textContent, 10);
         if (counterValue > 1) {
           return "com repeticao";
-        } 
+        }else {
+          return "sem repeticao";
+        }
       }else {
           return "sem repeticao";
         }
@@ -50,6 +52,7 @@ class ScrapyYooga {
       async processTypeComplement(typeComplement, complementExpandable, required) {
         const complement = typeComplement !== "" ? typeComplement : "";
         let repetition = await this.checkRepetition(complementExpandable);
+
           let minQtd = 0;
           let maxQtd = 0;
           if (required === "OBRIGATÓRIO") {
@@ -78,7 +81,7 @@ class ScrapyYooga {
             maxQtd = 1
           }
         
-        
+          
           let type = maxQtd > 1 ? "Mais de uma opcao " + repetition : "Apenas uma opcao " + repetition;
         
           return [type, minQtd, maxQtd];
